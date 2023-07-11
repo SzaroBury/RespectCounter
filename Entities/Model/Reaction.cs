@@ -5,8 +5,12 @@ namespace Entities.Model
     public class Reaction : IEntity
     {
         public ReactionType ReactionType { get; set; } = ReactionType.Like;
+
+        public int? ActivityId { get; set; }
         public Activity? Activity { get; set; }
+        public int? CommentId { get; set; }
         public Comment? Comment { get; set; }
+        public int? PersonId { get; set; }
         public Person? Person { get; set; }
     }
 

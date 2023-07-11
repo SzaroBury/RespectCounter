@@ -1,4 +1,5 @@
 ﻿using Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Model
 {
@@ -10,7 +11,9 @@ namespace Entities.Model
         public string Source { get; set; } = string.Empty;
         public bool Verified { get; set; } = false;
         public bool IsQuote { get; set; } = false;
-        public Person Person { get; set; } = new();
+        
+        public int PersonId { get; set; }
+        public Person Person { get; set; }
         public List<Reaction> Reactions { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
     }
