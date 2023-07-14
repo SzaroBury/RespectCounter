@@ -1,3 +1,15 @@
+# PublicFigures
+
+It is a simple app that gives users ability to make their opinion about figures added to the system
+
+
+
+
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
