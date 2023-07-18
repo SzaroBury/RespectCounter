@@ -21,7 +21,7 @@ Simple React + ASP.NET Core Web API application that allows users to express the
 - .NET 7
 - ASP.NET Core Web API
 - Entity Framework Core
-- MSSQL DB
+- MS SQL Server
 - React 18.2.0
 - React-Bootstrap 2.8.0
 
