@@ -1,4 +1,4 @@
-# PublicFigures (work in progress)
+# RespectCounter (work in progress)
 
 Simple React + ASP.NET Core Web API application that allows users to express their opinion on various public figures, their quotes and actions.
 
@@ -18,7 +18,7 @@ Simple React + ASP.NET Core Web API application that allows users to express the
 - CQRS pattern
 
 ## Technicalities:
-- .NET 7
+- .NET 8
 - ASP.NET Core Web API
 - Entity Framework Core
 - MS SQL Server
