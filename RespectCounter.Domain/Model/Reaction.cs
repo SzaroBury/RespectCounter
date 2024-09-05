@@ -1,6 +1,6 @@
-﻿using Entities.Interfaces;
+﻿using RespectCounter.Domain.Interfaces;
 
-namespace Entities.Model
+namespace RespectCounter.Domain.Model
 {
     public class Reaction : IEntity
     {

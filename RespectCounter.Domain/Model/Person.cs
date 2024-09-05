@@ -1,7 +1,7 @@
-﻿using Entities.Interfaces;
+﻿using RespectCounter.Domain.Interfaces;
 using System.Net;
 
-namespace Entities.Model
+namespace RespectCounter.Domain.Model
 {
     public class Person : IEntity
     {
@@ -11,6 +11,7 @@ namespace Entities.Model
         public string Nationality { get; set; } = string.Empty;
         public DateTime Birthday { get; set; } = DateTime.MinValue;
         public DateTime DeathDate { get; set; } = DateTime.MinValue;
+        public bool Verified { get; set; } = false;
         public float PublicScore { get; set; } = 5.0f;
         public List<Activity> Activities { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();

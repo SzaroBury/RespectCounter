@@ -3,7 +3,9 @@
 Simple React + ASP.NET Core Web API application that allows users to express their opinion on various public figures, their quotes and actions.
 
 ## Target main functionalities:
-- Regular users can add activities, quotes, comments and reactions.
+- Regular users can add quotes, comments, reactions and propositons for persons and activities.
+- Moderators can accept propositions created by users
+- Users can vote for other users propositions
 - Moderators can additionaly add new public figures
 - Searching activities by people tags
 
@@ -16,6 +18,11 @@ Simple React + ASP.NET Core Web API application that allows users to express the
 ## To do in backend:
 - All controlers
 - CQRS pattern
+
+## To run the app:
+- dotnet-ef update datebase
+- dotnet run
+- npm start
 
 ## Technicalities:
 - .NET 8

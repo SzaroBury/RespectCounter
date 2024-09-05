@@ -1,9 +1,8 @@
-﻿using Entities.Model;
+﻿using RespectCounter.Domain.Model;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace EFContext
+namespace RespectCounter.Infrastructure
 {
     internal static class SeedData
     {
@@ -13,10 +12,12 @@ namespace EFContext
         {
             SeedIdentity(mb);
 
+            Person RL = CreateDummyPerson(1, "Robert", "Lewandowski", new DateTime(1988, 08, 21), "Polish");
+            Person RK = CreateDummyPerson(2, "Robert", "Kubica", new DateTime(1984, 12, 07), "Polish");
             mb.Entity<Person>().HasData(new List<Person>
             {
-                CreateDummyPerson(1, "Robert", "Lewandowski", new DateTime(1988, 08, 21), "Polish"),
-                CreateDummyPerson(2, "Robert", "Kubica", new DateTime(1984, 12, 07), "Polish"),
+                RL,
+                RK,
                 CreateDummyPerson(3, "Andrzej", "Duda", new DateTime(1972, 05, 16), "Polish"),
                 CreateDummyPerson(4, "Donald", "Tusk", new DateTime(1957, 04, 22), "Polish")
             });
@@ -33,8 +34,8 @@ namespace EFContext
             });
             mb.Entity<Activity>().HasData(new List<Activity>
             {
-                CreateDummyActivity(1, 1, "Milik jest słaby", "", "Dude, just trust me", quote: true),
-                CreateDummyActivity(2, 2, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", happend: new DateTime(2010, 05, 15), ver: true)
+                CreateDummyActivity(1, "Milik jest słaby", "", "Dude, just trust me", RL, type: ActivityType.Quote),
+                CreateDummyActivity(2, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", RK, happend: new DateTime(2010, 05, 15), ver: true)
             });
             mb.Entity<Comment>().HasData(new List<Comment>
             {
@@ -84,8 +85,7 @@ namespace EFContext
 
             // Seed sys user
             PasswordHasher<IdentityUser> passwordHasher = new PasswordHasher<IdentityUser>();
-            var sysUserPassword = "123";
-            string pass = new PasswordHasher<IdentityUser>().HashPassword(null, sysUserPassword);
+            string pass = new PasswordHasher<IdentityUser>().HashPassword(null!, "123");
             SysUser = new IdentityUser { UserName = "sys", PasswordHash = pass, Id = sysUserGuid };
             mb.Entity<IdentityUser>().HasData(SysUser);
 
@@ -111,9 +111,9 @@ namespace EFContext
                 PublicScore = score,
 
                 Created = DateTime.Now,
-                CreatedById = SysUser.Id,
+                CreatedById = SysUser?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser.Id
+                LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
         private static Tag CreateDummyTag(int id, string name, bool mainTag = false, string desc = "Test desc")
@@ -127,32 +127,34 @@ namespace EFContext
                 //Persons = null
 
                 Created = DateTime.Now,
-                CreatedById = SysUser.Id,
+                CreatedById = SysUser?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser.Id
+                LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
-        private static Activity CreateDummyActivity(int id, int personId, string value, string desc, string source, DateTime? happend = null, bool quote = false, bool ver = false)
+        private static Activity CreateDummyActivity(int id, string val, string desc, string source, Person per, DateTime? happend = null, ActivityType type = ActivityType.Quote, bool ver = false)
         {
-            return new Entities.Model.Activity
+            var act = new Activity
             {
                 Id = id, 
-                Value = value,
+                Value = val,
                 Description = desc,
                 Happend = happend.GetValueOrDefault(),
-                IsQuote = quote,
+                Type = type,
                 Source = source,
                 Verified = ver,
-                PersonId = personId, 
                 //Person
                 //Reactions
                 //Comments
 
                 Created = DateTime.Now,
-                CreatedById = SysUser.Id,
+                CreatedById = SysUser?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser.Id
+                LastUpdatedById = SysUser?.Id ?? "sys"
             };
+            act.Persons.Add(per);
+
+            return act;
         }
         private static Comment CreateDummyComment(int id, string content, int? perId = null, int? actId = null, int? parentId = null) //, List<Reaction>? rea = null, List<Comment>? chil = null
         {
@@ -167,9 +169,9 @@ namespace EFContext
                 //Children = chil ?? new(),
 
                 Created = DateTime.Now,
-                CreatedById = SysUser.Id,
+                CreatedById = SysUser?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser.Id
+                LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
         private static Reaction CreateDummyReaction(int id, ReactionType type, int? perId = null, int? actId = null, int? comId = null)
@@ -183,9 +185,9 @@ namespace EFContext
                 CommentId = comId,
 
                 Created = DateTime.Now,
-                CreatedById = SysUser.Id,
+                CreatedById = SysUser?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser.Id
+                LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }   
     }

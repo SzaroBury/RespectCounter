@@ -1,7 +1,7 @@
-﻿using Entities.Interfaces;
+﻿using RespectCounter.Domain.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace Entities.Model
+namespace RespectCounter.Domain.Model
 {
     public class Activity : IEntity
     {
@@ -10,11 +10,15 @@ namespace Entities.Model
         public DateTime Happend { get; set; } = DateTime.MinValue;
         public string Source { get; set; } = string.Empty;
         public bool Verified { get; set; } = false;
-        public bool IsQuote { get; set; } = false;
-        
-        public int PersonId { get; set; }
-        public Person Person { get; set; }
+        public ActivityType Type { get; set; } = ActivityType.Event;
+        public List<Person> Persons { get; set; } = new();
         public List<Reaction> Reactions { get; set; } = new();
         public List<Comment> Comments { get; set; } = new();
+    }
+
+    public enum ActivityType
+    {
+        Event,
+        Quote
     }
 }

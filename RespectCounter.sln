@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ReactApp", "RespectCounter.ReactApp\RespectCounter.ReactApp.esproj", "{730A126C-3F7A-4782-B5BF-21F2E285240B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "RespectCounter.API\RespectCounter.API.csproj", "{1C061E7C-3FCE-4069-B094-45BBC5278590}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "RespectCounter.Application\RespectCounter.Application.csproj", "{F5613EA1-78A9-4BEA-AC66-514560E2832C}"

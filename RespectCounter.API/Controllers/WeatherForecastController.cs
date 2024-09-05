@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace webapi.Controllers;
+namespace RespectCounter.API.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]

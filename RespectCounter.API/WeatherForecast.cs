@@ -1,4 +1,4 @@
-namespace webapi;
+namespace RespectCounter.API;
 
 public class WeatherForecast
 {

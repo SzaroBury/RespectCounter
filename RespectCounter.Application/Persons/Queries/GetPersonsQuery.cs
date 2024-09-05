@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using System.Net;
 
-namespace Entities.Model.Queries
+namespace RespectCounter.Application.Persons.Queries
 {
     public record GetPersonsQuery() : IRequest<string>;
 

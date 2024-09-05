@@ -1,7 +1,7 @@
-﻿using Entities.Interfaces;
+﻿using RespectCounter.Domain.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace Entities.Model
+namespace RespectCounter.Domain.Model
 {
     public class Tag : IEntity
     {
@@ -10,5 +10,7 @@ namespace Entities.Model
         public string Description { get; set; } = string.Empty;
         public bool IsMainTag { get; set; } = false;
         public List<Person> Persons { get; set; } = new();
+        public List<Activity> Activities { get; set; } = new();
+        public int Count => Persons.Count + Activities.Count;
     }
 }
