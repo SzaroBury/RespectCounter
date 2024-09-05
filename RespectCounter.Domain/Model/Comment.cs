@@ -1,4 +1,5 @@
-﻿using RespectCounter.Domain.Interfaces;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Domain.Model
 {
@@ -7,12 +8,13 @@ namespace RespectCounter.Domain.Model
         public string Content { get; set; } = string.Empty;
         
         public int? ActivityId { get; set; }
-        public Activity? Activity { get; set; }
+        public virtual Activity? Activity { get; set; }
         public int? PersonId { get; set; }
-        public Person? Person { get; set; }
+        public virtual Person? Person { get; set; }
+        [ForeignKey("Comment")]
         public int? ParentId { get; set; }
-        public Comment? Parent { get; set; }
-        public List<Reaction> Reactions { get; set; } = new();
-        public List<Comment> Children { get; set; } = new();
+        public virtual Comment? Parent { get; set; }
+        public virtual List<Reaction> Reactions { get; set; } = new();
+        public virtual List<Comment> Children { get; set; } = new();
     }
 }

@@ -13,9 +13,9 @@ namespace RespectCounter.Domain.Model
         public DateTime DeathDate { get; set; } = DateTime.MinValue;
         public bool Verified { get; set; } = false;
         public float PublicScore { get; set; } = 5.0f;
-        public List<Activity> Activities { get; set; } = new();
-        public List<Comment> Comments { get; set; } = new();
-        public List<Reaction> Reactions { get; set; } = new();
-        public List<Tag> Tags { get; set; } = new();
+        public virtual List<Activity> Activities { get; set; } = new();
+        public virtual List<Comment> Comments { get; set; } = new();
+        public virtual List<Reaction> Reactions { get; set; } = new();
+        public virtual List<Tag> Tags { get; set; } = new();
     }
 }

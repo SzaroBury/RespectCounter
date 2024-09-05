@@ -1,15 +1,24 @@
 ﻿using MediatR;
 using System.Net;
+using RespectCounter.Infrastructure;
+using RespectCounter.Infrastructure.Repositories;
 
-namespace RespectCounter.Application.Persons.Queries
+namespace RespectCounter.Application.Queries
 {
     public record GetPersonsQuery() : IRequest<string>;
 
     public class GetPersonsQueryHandler : IRequestHandler<GetPersonsQuery, string>
     {
-        public async Task<string> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        private readonly IUnitOfWork uow;
+
+        public GetPersonsQueryHandler(IUnitOfWork uow)
         {
-            return "test";
+            this.uow = uow;
+        }
+
+        public Task<string> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -9,8 +9,8 @@ namespace RespectCounter.Domain.Model
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool IsMainTag { get; set; } = false;
-        public List<Person> Persons { get; set; } = new();
-        public List<Activity> Activities { get; set; } = new();
+        public virtual List<Person> Persons { get; set; } = new();
+        public virtual List<Activity> Activities { get; set; } = new();
         public int Count => Persons.Count + Activities.Count;
     }
 }

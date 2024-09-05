@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RespectCounter.Infrastructure\RespectCounter.Infrastructure.csproj" />
+    <ProjectReference Include="..\RespectCounter.Application\RespectCounter.Application.csproj" />
   </ItemGroup>
 
 </Project>
