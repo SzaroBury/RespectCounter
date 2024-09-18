@@ -5,9 +5,14 @@ using System.Net;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetPersonByIdQuery() : IRequest<Person>
+    public record GetPersonByIdQuery : IRequest<Person>
     {
-        public int Id { get; init; }
+        public string Id { get; init; } = "";
+        
+        public GetPersonByIdQuery(string id)
+        {
+            Id = id;
+        }
     }
 
     public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Person>
@@ -21,7 +26,7 @@ namespace RespectCounter.Application.Queries
 
         public async Task<Person> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
         {
-            var person = await uow.Repository().GetById<Person>(request.Id);
+            var person = await uow.Repository().SingleOrDefaultAsync<Person>(p => p.Id.ToString() == request.Id, "Tags,Comments,Activities,Reactions");
             if (person is null)
                 throw new KeyNotFoundException("Person not found. Please enter the existing Person Id.");
 
