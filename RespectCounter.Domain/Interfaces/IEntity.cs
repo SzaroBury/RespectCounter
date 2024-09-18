@@ -4,14 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RespectCounter.Domain.Interfaces
 {
-    public class IEntity
+    public interface IEntity
     {
-        public int Id { get; set; }
-        
-        public DateTime Created { get; set; } = DateTime.Now;
-        public string CreatedById { get; set; } = "sys";
-        public DateTime LastUpdated { get; set; } = DateTime.Now;
-        public string LastUpdatedById { get; set; } = "sys";
+        public Guid Id { get; set; }
+        public DateTime Created { get; set; }
+        public string CreatedById { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public string LastUpdatedById { get; set; }
         
         // [DeleteBehavior(DeleteBehavior.NoAction)]
         // public IdentityUser CreatedBy { get; set; }

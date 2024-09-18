@@ -12,63 +12,108 @@ namespace RespectCounter.Infrastructure
         {
             SeedIdentity(mb);
 
-            Person RL = CreateDummyPerson(1, "Robert", "Lewandowski", new DateTime(1988, 08, 21), "Polish");
-            Person RK = CreateDummyPerson(2, "Robert", "Kubica", new DateTime(1984, 12, 07), "Polish");
+            Guid RL = Guid.NewGuid();
+            Guid RK = Guid.NewGuid();
+            Guid AD = Guid.NewGuid();
+            Guid DT = Guid.NewGuid();
             mb.Entity<Person>().HasData(new List<Person>
             {
-                RL,
-                RK,
-                CreateDummyPerson(3, "Andrzej", "Duda", new DateTime(1972, 05, 16), "Polish"),
-                CreateDummyPerson(4, "Donald", "Tusk", new DateTime(1957, 04, 22), "Polish")
+                CreateDummyPerson(RL, "Robert", "Lewandowski", new DateOnly(1988, 08, 21), "Polish"),
+                CreateDummyPerson(RK, "Robert", "Kubica", new DateOnly(1984, 12, 07), "Polish"),
+                CreateDummyPerson(AD, "Andrzej", "Duda", new DateOnly(1972, 05, 16), "Polish"),
+                CreateDummyPerson(DT, "Donald", "Tusk", new DateOnly(1957, 04, 22), "Polish")
             });
-            mb.Entity<Tag>().HasData(new List<Tag>
-            {
-                CreateDummyTag(1, "Sport", true),
-                CreateDummyTag(2, "Football"),
-                CreateDummyTag(3, "FC Barcelona"),
-                CreateDummyTag(4, "F1"),
-                CreateDummyTag(5, "WEC"),
-                CreateDummyTag(6, "Politics", true),
-                CreateDummyTag(7, "PiS"),
-                CreateDummyTag(8, "PO"),
-            });
+
+            Guid RLactivity = Guid.NewGuid();
+            Guid RKactivity = Guid.NewGuid();
             mb.Entity<Activity>().HasData(new List<Activity>
             {
-                CreateDummyActivity(1, "Milik jest słaby", "", "Dude, just trust me", RL, type: ActivityType.Quote),
-                CreateDummyActivity(2, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", RK, happend: new DateTime(2010, 05, 15), ver: true)
+                CreateDummyActivity(RLactivity, "Milik jest słaby", "", "Dude, just trust me", type: ActivityType.Quote),
+                CreateDummyActivity(RKactivity, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", happend: new DateTime(2010, 05, 15), status: ActivityStatus.Verified)
             });
+            mb.Entity<Activity>().HasMany(a => a.Persons).WithMany(a => a.Activities)
+                .UsingEntity<Dictionary<string, object>>(
+                "ActivityPerson",
+                AP => AP.HasData(
+                    new { ActivitiesId = RLactivity, PersonsId = RL }, // RL -> Quote
+                    new { ActivitiesId = RKactivity, PersonsId = RK } // RK -> Monaco P2
+                )
+            );
+
+
+            Guid RLComment = Guid.NewGuid();
+            Guid RLActivityComment = Guid.NewGuid();
+            Guid ADComment = Guid.NewGuid();
+ 
             mb.Entity<Comment>().HasData(new List<Comment>
             {
-                CreateDummyComment(1, "Najlepszy zawodnik!",                perId: 1),
-                CreateDummyComment(2, "No nie wiem. Milik lepszy!",         parentId: 1),
-                CreateDummyComment(3, "Jest całkiem dobry faktycznie",      parentId: 1),
-                CreateDummyComment(4, "Fajność!",                           actId: 1),
-                CreateDummyComment(5, "Zgadza się!",                        parentId: 4),
-                CreateDummyComment(6, "Niefajność",                         actId: 1),             
-                CreateDummyComment(7, "Lepsza weeeeeersja: https://www.youtube.com/watch?v=vmLonweq6wA", actId: 2),
-                CreateDummyComment(8, "Bardzo memiczna osoba",              perId: 3),
-                CreateDummyComment(9, "Hańba!",                             parentId : 8),
-                CreateDummyComment(10, "Chyba ty",                          parentId : 8),
-                CreateDummyComment(11, "Ja tam mu nei ufam",                perId: 3),
-                CreateDummyComment(12, "Nie lubiem go, bo Andrzej to dziwne imię", perId: 3)
+                CreateDummyComment(RLComment, "Najlepszy zawodnik!",                    perId: RL),
+                CreateDummyComment(Guid.NewGuid(), "No nie wiem. Milik lepszy!",        parentId: RLComment),
+                CreateDummyComment(Guid.NewGuid(), "Jest całkiem dobry faktycznie",     parentId: RLComment),
+                CreateDummyComment(RLActivityComment, "Fajność!",                       actId: RLactivity),
+                CreateDummyComment(Guid.NewGuid(), "Zgadza się!",                       parentId: RLActivityComment),
+                CreateDummyComment(Guid.NewGuid(), "Niefajność",                        actId: RLactivity),             
+                CreateDummyComment(Guid.NewGuid(), "Lepsza weeeeeersja: https://www.youtube.com/watch?v=vmLonweq6wA", actId: RKactivity),
+                CreateDummyComment(ADComment, "Bardzo memiczna osoba",                  perId: AD),
+                CreateDummyComment(Guid.NewGuid(), "Hańba!",                            parentId : ADComment),
+                CreateDummyComment(Guid.NewGuid(), "Chyba ty",                          parentId : ADComment),
+                CreateDummyComment(Guid.NewGuid(), "Ja tam mu nei ufam",                perId: AD),
+                CreateDummyComment(Guid.NewGuid(), "Nie lubiem go, bo Andrzej to dziwne imię", perId: AD)
             });
+
+            Guid sportTag = Guid.NewGuid();
+            Guid footballTag = Guid.NewGuid();
+            Guid fcbarcelonaTag = Guid.NewGuid();
+            Guid f1Tag = Guid.NewGuid();
+            Guid wecTag = Guid.NewGuid();
+            Guid politicsTag = Guid.NewGuid();
+            Guid pisTag = Guid.NewGuid();
+            Guid poTag = Guid.NewGuid();
+            mb.Entity<Tag>().HasData(new List<Tag>
+            {
+                CreateDummyTag(sportTag, "Sport", 1),
+                CreateDummyTag(footballTag, "Football"),
+                CreateDummyTag(fcbarcelonaTag, "FC Barcelona"),
+                CreateDummyTag(f1Tag, "F1"),
+                CreateDummyTag(wecTag, "WEC"),
+                CreateDummyTag(politicsTag, "Politics", 1),
+                CreateDummyTag(pisTag, "PiS"),
+                CreateDummyTag(poTag, "PO"),
+            });
+            mb.Entity<Person>().HasMany(p => p.Tags).WithMany(t => t.Persons)
+                .UsingEntity<Dictionary<string, object>>
+                (
+                    "TagPerson",
+                    TP => TP.HasData(
+                        new { TagsId = sportTag, PersonsId = RL },
+                        new { TagsId = sportTag, PersonsId = RK },
+                        new { TagsId = footballTag, PersonsId = RL },
+                        new { TagsId = fcbarcelonaTag, PersonsId = RL },
+                        new { TagsId = f1Tag, PersonsId = RK },
+                        new { TagsId = wecTag, PersonsId = RK },
+                        new { TagsId = politicsTag, PersonsId = AD },
+                        new { TagsId = politicsTag, PersonsId = DT },
+                        new { TagsId = pisTag, PersonsId = AD },
+                        new { TagsId = poTag, PersonsId = DT }
+                    )
+                );
             mb.Entity<Reaction>().HasData(new List<Reaction>
             {
-                CreateDummyReaction(8, ReactionType.Hate,           perId: 1),
-                CreateDummyReaction(9, ReactionType.NotUnderstand,  perId: 1),
-                CreateDummyReaction(10, ReactionType.Dislike,       perId: 1),
-                CreateDummyReaction(11, ReactionType.Like,          perId: 1),
-                CreateDummyReaction(12, ReactionType.Love,          perId: 1),
-                CreateDummyReaction(13, ReactionType.Love,          perId: 1),
-                CreateDummyReaction(14, ReactionType.Love,          perId: 1),
-                CreateDummyReaction(15, ReactionType.Love,          perId: 1),
-                CreateDummyReaction(4, ReactionType.Like,           actId: 1),
-                CreateDummyReaction(5, ReactionType.NotUnderstand,  actId: 1),
-                CreateDummyReaction(6, ReactionType.Like,           actId: 1),
-                CreateDummyReaction(7, ReactionType.Love,           actId: 1),
-                CreateDummyReaction(3, ReactionType.Love,           comId: 4),
-                CreateDummyReaction(1, ReactionType.Like,           comId: 5),
-                CreateDummyReaction(2, ReactionType.Love,           comId: 5)
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Hate,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.NotUnderstand,  perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Dislike,        perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.NotUnderstand,  actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           comId: RLComment),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           comId: RLActivityComment),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           comId: RLActivityComment)
             });
         }
 
@@ -97,7 +142,7 @@ namespace RespectCounter.Infrastructure
             
         }
 
-        private static Person CreateDummyPerson(int id, string firstName, string lastName, DateTime birthDate, string nationality, DateTime? deathDate = null, float score = 5.0f, string desc = "Test desc")
+        private static Person CreateDummyPerson(Guid id, string firstName, string lastName, DateOnly birthDate, string nationality, DateOnly? deathDate = null, float score = 5.0f, string desc = "Test desc")
         {
             return new Person
             {
@@ -108,7 +153,6 @@ namespace RespectCounter.Infrastructure
                 Birthday = birthDate,
                 DeathDate = deathDate.GetValueOrDefault(),
                 Nationality = nationality,
-                PublicScore = score,
 
                 Created = DateTime.Now,
                 CreatedById = SysUser?.Id ?? "sys",
@@ -116,13 +160,13 @@ namespace RespectCounter.Infrastructure
                 LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
-        private static Tag CreateDummyTag(int id, string name, bool mainTag = false, string desc = "Test desc")
+        private static Tag CreateDummyTag(Guid id, string name, int level = 5, string desc = "Test desc")
         {
             return new Tag
             {
                 Id = id,
                 Name = name,
-                IsMainTag = mainTag,
+                Level = level,
                 Description = desc, 
                 //Persons = null
 
@@ -132,9 +176,9 @@ namespace RespectCounter.Infrastructure
                 LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
-        private static Activity CreateDummyActivity(int id, string val, string desc, string source, Person per, DateTime? happend = null, ActivityType type = ActivityType.Quote, bool ver = false)
+        private static Activity CreateDummyActivity(Guid id, string val, string desc, string source, DateTime? happend = null, ActivityType type = ActivityType.Quote, ActivityStatus status = ActivityStatus.NotVerified)
         {
-            var act = new Activity
+            return new Activity
             {
                 Id = id, 
                 Value = val,
@@ -142,7 +186,7 @@ namespace RespectCounter.Infrastructure
                 Happend = happend.GetValueOrDefault(),
                 Type = type,
                 Source = source,
-                Verified = ver,
+                Status = status,
                 //Person
                 //Reactions
                 //Comments
@@ -152,11 +196,8 @@ namespace RespectCounter.Infrastructure
                 LastUpdated = DateTime.Now,
                 LastUpdatedById = SysUser?.Id ?? "sys"
             };
-            act.Persons.Add(per);
-
-            return act;
         }
-        private static Comment CreateDummyComment(int id, string content, int? perId = null, int? actId = null, int? parentId = null) //, List<Reaction>? rea = null, List<Comment>? chil = null
+        private static Comment CreateDummyComment(Guid id, string content, Guid? perId = null, Guid? actId = null, Guid? parentId = null) //, List<Reaction>? rea = null, List<Comment>? chil = null
         {
             return new Comment
             {
@@ -174,7 +215,7 @@ namespace RespectCounter.Infrastructure
                 LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
-        private static Reaction CreateDummyReaction(int id, ReactionType type, int? perId = null, int? actId = null, int? comId = null)
+        private static Reaction CreateDummyReaction(Guid id, ReactionType type, Guid? perId = null, Guid? actId = null, Guid? comId = null)
         {
             return new Reaction
             {

@@ -1,21 +1,24 @@
-﻿using RespectCounter.Domain.Interfaces;
-using System.Net;
-
-namespace RespectCounter.Domain.Model
+﻿namespace RespectCounter.Domain.Model
 {
-    public class Person : IEntity
+    public class Person : Entity
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Nationality { get; set; } = string.Empty;
-        public DateTime Birthday { get; set; } = DateTime.MinValue;
-        public DateTime DeathDate { get; set; } = DateTime.MinValue;
-        public bool Verified { get; set; } = false;
-        public float PublicScore { get; set; } = 5.0f;
+        public DateOnly Birthday { get; set; } = DateOnly.MinValue;
+        public DateOnly? DeathDate { get; set; } = null;
+        public PersonStatus Status { get; set; } = PersonStatus.NotVerified;
         public virtual List<Activity> Activities { get; set; } = new();
         public virtual List<Comment> Comments { get; set; } = new();
         public virtual List<Reaction> Reactions { get; set; } = new();
         public virtual List<Tag> Tags { get; set; } = new();
+    }
+
+        public enum PersonStatus
+    {
+        NotVerified,
+        Verified,
+        Hidden
     }
 }
