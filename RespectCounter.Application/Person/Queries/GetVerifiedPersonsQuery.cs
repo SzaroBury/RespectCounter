@@ -72,7 +72,8 @@ namespace RespectCounter.Application.Queries
                     ordered = await persons.OrderByDescending(p => p.Created).ToListAsync();               
                     break;
                 case "tr":
-                    ordered = await persons.Select(p => new Tuple<Person, int>
+                    ordered = await persons.Include("Reactions").ToListAsync();
+                    ordered = persons.Select(p => new Tuple<Person, int>
                     (
                         p, 
                         RespectService.CountRespect
@@ -82,7 +83,7 @@ namespace RespectCounter.Application.Queries
                     ))
                     .OrderBy(t => t.Item2)
                     .Select(t => t.Item1)
-                    .ToListAsync();
+                    .ToList();
                     break;
                 case "Az":
                     ordered = await persons.OrderBy(p => p.LastName).ToListAsync();
