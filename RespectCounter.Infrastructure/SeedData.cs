@@ -19,7 +19,7 @@ namespace RespectCounter.Infrastructure
             mb.Entity<Person>().HasData(new List<Person>
             {
                 CreateDummyPerson(RL, "Robert", "Lewandowski", new DateOnly(1988, 08, 21), "Polish"),
-                CreateDummyPerson(RK, "Robert", "Kubica", new DateOnly(1984, 12, 07), "Polish"),
+                CreateDummyPerson(RK, "Robert", "Kubica", new DateOnly(1984, 12, 07), "Polish", status: PersonStatus.NotVerified),
                 CreateDummyPerson(AD, "Andrzej", "Duda", new DateOnly(1972, 05, 16), "Polish"),
                 CreateDummyPerson(DT, "Donald", "Tusk", new DateOnly(1957, 04, 22), "Polish")
             });
@@ -142,7 +142,7 @@ namespace RespectCounter.Infrastructure
             
         }
 
-        private static Person CreateDummyPerson(Guid id, string firstName, string lastName, DateOnly birthDate, string nationality, DateOnly? deathDate = null, float score = 5.0f, string desc = "Test desc")
+        private static Person CreateDummyPerson(Guid id, string firstName, string lastName, DateOnly birthDate, string nationality, DateOnly? deathDate = null, PersonStatus status = PersonStatus.Verified, string desc = "Test desc")
         {
             return new Person
             {
@@ -153,6 +153,7 @@ namespace RespectCounter.Infrastructure
                 Birthday = birthDate,
                 DeathDate = deathDate.GetValueOrDefault(),
                 Nationality = nationality,
+                Status = status,
 
                 Created = DateTime.Now,
                 CreatedById = SysUser?.Id ?? "sys",
