@@ -16,7 +16,7 @@ builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Re
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<RespectDbContext>();
 builder.Services.AddDbContext<RespectDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(RespectService).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(RespectService)));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
