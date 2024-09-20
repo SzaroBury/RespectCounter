@@ -11,12 +11,12 @@ namespace RespectCounter.Application.Queries
     public record GetPersonsQuery : IRequest<List<Person>>
     {
         public string Search { get; set; } = "";
-        public string Order { get; set; } = "mr";
+        public string Order { get; set; } = "";
 
         public GetPersonsQuery(string search, string order)
         {
             Search = search;
-            Order = order.IsNullOrEmpty() ? "mr" : order;
+            Order = string.IsNullOrEmpty(order) ? "la" : order;
         }
     }
 
@@ -31,16 +31,26 @@ namespace RespectCounter.Application.Queries
 
         public async Task<List<Person>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
-            var persons = await uow.Repository().FindQueryable<Person>(
-                p => p.Status != PersonStatus.Hidden
-                    && ( p.FirstName.ToLower().Contains(request.Search.ToLower())
-                    || p.LastName.ToLower().Contains(request.Search.ToLower())
-                    || p.Nationality.ToLower().Contains(request.Search.ToLower())
-                    || p.Description.ToLower().Contains(request.Search.ToLower())
-                    || p.Tags.Any(t => t.Name.ToLower().Contains(request.Search.ToLower())))
-            ).ToListAsync();
-
-            return persons;
+            IQueryable<Person> persons;
+            if(string.IsNullOrEmpty(request.Search))
+            {
+                persons = uow.Repository().FindQueryable<Person>(p => p.Status != PersonStatus.Hidden);
+            }
+            else
+            {
+                var search = request.Search.ToLower();
+                persons = uow.Repository().FindQueryable<Person>(
+                    p => p.Status != PersonStatus.Hidden
+                        && ( p.FirstName.ToLower().Contains(search)
+                            || p.LastName.ToLower().Contains(search)
+                            || p.Nationality.ToLower().Contains(search)
+                            || p.Description.ToLower().Contains(search)
+                            || p.Tags.Any(t => t.Name.ToLower().Contains(search))
+                        )
+                );
+            }
+            
+            return await RespectService.OrderPersonsAsync(persons, request.Order);
         }
     }
 }
