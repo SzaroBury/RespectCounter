@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RespectCounter.Application.Queries;
 using RespectCounter.Domain.Model;
+using RespectCounter.Infrastructure.Repositories;
 
 namespace RespectCounter.API.Controllers;
 
@@ -39,16 +40,20 @@ public class PersonController: ControllerBase
 
     #region Querries
     [HttpGet("/api/persons")]
-    public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search, [FromQuery] string order)
+    public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {
-        var query = new GetVerifiedPersonsQuery(search, order);
+        var query = new GetVerifiedPersonsQuery
+        {
+            Search = search,
+            Order = order
+        };
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
     [HttpGet("/api/persons/all")]
-    public async Task<IActionResult> GetPersons([FromQuery] string search, [FromQuery] string order)
+    public async Task<IActionResult> GetPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {
         var query = new GetPersonsQuery(search, order);
         var result = await mediator.Send(query);
