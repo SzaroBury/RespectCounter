@@ -1,8 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
+using RespectCounter.Domain.DTO;
 using RespectCounter.Domain.Model;
-using RespectCounter.Infrastructure.Repositories;
 
 namespace RespectCounter.API.Controllers;
 
@@ -25,7 +26,7 @@ namespace RespectCounter.API.Controllers;
 //other todos: auto added tag based on nationality
 
 [ApiController]
-[Route("api/persons")]
+[Route("api/person")]
 public class PersonController: ControllerBase
 {
 
@@ -80,10 +81,13 @@ public class PersonController: ControllerBase
     #endregion
 
     #region Commands
-    [HttpPost()]
-    public Task<IActionResult> ProposePerson([FromBody] Person newPerson)
+    [HttpPost]
+    public async Task<IActionResult> ProposePerson([FromBody] NewPerson newPerson)
     {
-        throw new NotImplementedException();
+        var command = new AddPersonCommand(){ Person = newPerson };
+        Person result = await mediator.Send(command);
+
+        return Ok(result);
     }
 
     [HttpPut("{id}/verify")]
