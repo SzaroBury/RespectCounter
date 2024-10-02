@@ -14,7 +14,7 @@ namespace RespectCounter.Infrastructure.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<T?> GetById<T>(int id) where T : Entity
+        public async Task<T?> GetById<T>(Guid id) where T : Entity
         {
             return await dbContext.Set<T>().FindAsync(id);
         }
