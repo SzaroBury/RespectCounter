@@ -50,11 +50,11 @@ Simple React + ASP.NET Core Web API application that allows users to express the
 - React 18.2.0
 - React-Bootstrap 2.8.0
 
-## Entities:
+## Main entities:
 - Person
 - Activity
 - Comment
 - Reaction
 - Tag
-  
-![image](https://github.com/SzaroBury/PublicFigures/assets/37550354/c066d9c8-13db-40f7-855b-50c6465b85c6)
+
+![image](RespectCounterERD.png)
