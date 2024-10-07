@@ -23,6 +23,21 @@ namespace RespectCounter.Application.Commands
         {
             DateTime now = DateTime.Now;
             Guid newId = Guid.NewGuid();
+            DateOnly? deathDate = null;
+            
+            if(!DateOnly.TryParse(request.Person.Birthday, out DateOnly birthday))
+            {
+                throw new ArgumentException("Invalid birthday format.");
+            }
+
+            if(!string.IsNullOrEmpty(request.Person.DeathDate))
+            {
+                if(!DateOnly.TryParse(request.Person.DeathDate, out DateOnly result))
+                {
+                    throw new ArgumentException("Invalid deathDate format.");
+                }
+                deathDate = result;
+            }
 
             Person? newPerson = new Person
             {
@@ -31,8 +46,8 @@ namespace RespectCounter.Application.Commands
                 LastName = request.Person.LastName,
                 Description = request.Person.Description,
                 Nationality = request.Person.Nationality,
-                Birthday = DateOnly.Parse(request.Person.Birthday),
-                DeathDate = request.Person.DeathDate == null ? null : DateOnly.Parse(request.Person.DeathDate),
+                Birthday = birthday,
+                DeathDate = deathDate,
 
                 Status = PersonStatus.NotVerified,
                 Created = now,
@@ -44,7 +59,7 @@ namespace RespectCounter.Application.Commands
             List<string> tags = request.Person.Tags.Split(",").ToList();
             foreach(string tag in tags)
             {
-                Tag? existingTag = uow.Repository().FindQueryable<Tag>(t => t.Name == tag).FirstOrDefault();
+                Tag? existingTag = uow.Repository().FindQueryable<Tag>(t => t.Name.ToLower() == tag.ToLower()).FirstOrDefault();
                 if(existingTag == null)
                 {
                     Tag newTag = new Tag 
