@@ -91,9 +91,12 @@ public class PersonController: ControllerBase
     }
 
     [HttpPut("{id}/verify")]
-    public Task<IActionResult> VerifyPerson(string id)
+    public async Task<IActionResult> VerifyPerson(string id)
     {
-        throw new NotImplementedException();
+        var command = new VerifyPersonCommand(){ Id = id };
+        Person result = await mediator.Send(command);
+
+        return Ok(result);
     }
 
     [HttpPost("{id}/respect/{reaction}")]
