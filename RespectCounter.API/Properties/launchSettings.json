@@ -11,6 +11,7 @@
   "profiles": {
     "http": {
       "commandName": "Project",
+      "commandLineArgs": "-m",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
