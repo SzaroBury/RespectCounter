@@ -13,6 +13,7 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(RespectDbContext context)
     {
         this.context = context;
+        context.Database.EnsureCreated();
     }
 
     public IRepository Repository()
