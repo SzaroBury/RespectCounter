@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
@@ -111,10 +112,14 @@ public class PersonController: ControllerBase
         throw new NotImplementedException();
     }
 
-    [HttpPost("{id}/tag/{tags}")]
-    public Task<IActionResult> TagPerson(string id, string tags)
+    [Authorize]
+    [HttpPost("{id}/tag/{tag}")]
+    public async Task<IActionResult> TagPerson(string id, string tag)
     {
-        throw new NotImplementedException();
+        var command = new AddTagToPersonCommand(){ PersonId = id, TagName = tag, User = User};
+        Person result = await mediator.Send(command);
+
+        return Ok(result);
     }
 
     [HttpPut("{id}")]
