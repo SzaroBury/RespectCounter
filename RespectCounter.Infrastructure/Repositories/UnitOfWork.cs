@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Infrastructure.Repositories;
@@ -9,10 +10,12 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly RespectDbContext context;
     private bool disposed;
+    public UserManager<IdentityUser> UserManager { get; init; }
 
-    public UnitOfWork(RespectDbContext context)
+    public UnitOfWork(RespectDbContext context, UserManager<IdentityUser> userManager)
     {
         this.context = context;
+        this.UserManager = userManager;
         context.Database.EnsureCreated();
     }
 
@@ -44,6 +47,7 @@ public class UnitOfWork : IUnitOfWork
             if (disposing)
             {
                 context.Dispose();
+                UserManager.Dispose();
             }
         }
         disposed = true;
