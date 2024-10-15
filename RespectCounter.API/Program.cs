@@ -17,7 +17,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkSto
 if(args.Any(arg => arg == "-m"))
 {
     builder.Services.AddDbContext<RespectDbContext>(options => options.UseInMemoryDatabase("RespectCounterDB"));
-    Console.WriteLine("The server is going to use a in-memory database.");
+    Console.WriteLine("The server is going to use an in-memory database.");
 }
 else builder.Services.AddDbContext<RespectDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
