@@ -110,10 +110,14 @@ public class PersonController: ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
     [HttpPost("{id}/comment")]
-    public Task<IActionResult> CommentPerson(string id, [FromBody] Comment newComment)
+    public async Task<IActionResult> CommentPerson(string id, [FromBody] string content)
     {
-        throw new NotImplementedException();
+        var command = new AddCommentToPersonCommand(){ PersonId = id, Content = content, User = User};
+        Person result = await mediator.Send(command);
+
+        return Ok(result);;
     }
 
     [Authorize]
