@@ -36,7 +36,7 @@ namespace RespectCounter.Application.Commands
             if(targetPerson == null) throw new KeyNotFoundException("There is no person object with the given id value.");
 
             Reaction? reaction = uow.Repository().FindQueryable<Reaction>(r => r.PersonId == personId && r.CreatedById == user.Id).FirstOrDefault();
-            if(reaction != null) throw new InvalidOperationException("The user have reacted already for this person");
+            if(reaction != null) throw new InvalidOperationException("This user has already reacted to this person.");
 
             if(!Enum.IsDefined(typeof(ReactionType), request.ReactionType)) throw new ArgumentException("Invalid format of the reaction type.");
 
