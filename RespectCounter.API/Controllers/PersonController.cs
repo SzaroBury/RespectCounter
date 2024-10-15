@@ -100,10 +100,14 @@ public class PersonController: ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("{id}/respect/{reaction}")]
-    public Task<IActionResult> RespectPerson(string id, int reaction)
+    [Authorize]
+    [HttpPost("{id}/reaction/{reaction}")]
+    public async Task<IActionResult> ReactionToPerson(string id, int reaction)
     {
-        throw new NotImplementedException();
+        var command = new AddReactionToPersonCommand(){ PersonId = id, ReactionType = reaction, User = User};
+        Person result = await mediator.Send(command);
+
+        return Ok(result);
     }
 
     [HttpPost("{id}/comment")]
