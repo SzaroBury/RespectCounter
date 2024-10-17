@@ -54,6 +54,22 @@ public class ActivityController: ControllerBase
 
         return Ok(result);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetActivity(string id)
+    {
+        var query = new GetActivityByIdQuery(id);
+
+        try
+        {
+            var result = await mediator.Send(query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
     #endregion
     
     
