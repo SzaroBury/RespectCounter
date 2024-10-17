@@ -1,4 +1,6 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RespectCounter.Application.Queries;
 
 namespace RespectCounter.API.Controllers;
 
@@ -21,16 +23,28 @@ namespace RespectCounter.API.Controllers;
 //other todos: auto added tag based on nationality
 
 [ApiController]
+[Route("api/activity")]
 public class ActivityController: ControllerBase
 {
     private readonly ILogger<ActivityController> logger;
+    private readonly ISender mediator;
 
-    public ActivityController(ILogger<ActivityController> logger)
+    public ActivityController(ILogger<ActivityController> logger, ISender mediator)
     {
         this.logger = logger;
+        this.mediator = mediator;
     }
 
+    #region Queries
+    [HttpGet("/api/activities/all")]
+    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "")
+    {
+        var query = new GetActivitesQuery(search, order);
+        var result = await mediator.Send(query);
 
+        return Ok(result);
+    }
+    #endregion
     
     
     

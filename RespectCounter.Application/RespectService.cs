@@ -34,6 +34,7 @@ public static class RespectService
 
     public static async Task<List<Person>> OrderPersonsAsync(IQueryable<Person> persons, string order)
     {
+        int trendingDays = 7;
         List<Person> ordered = new();
         if(string.IsNullOrEmpty(order)) order = "la";
         switch(order)
@@ -64,7 +65,7 @@ public static class RespectService
                     p, 
                     CountRespect
                     (
-                        p.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-7)).ToList()
+                        p.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-trendingDays)).ToList()
                     )
                 ))
                 .OrderBy(t => t.Item2)
@@ -82,4 +83,48 @@ public static class RespectService
         return ordered;
     }
 
+    public static async Task<List<Activity>> OrderActivitiesAsync(IQueryable<Activity> posts, string order)
+    {
+        int trendingDays = 7;
+        List<Activity> ordered = new();
+        if(string.IsNullOrEmpty(order)) order = "la";
+        switch(order)
+        {
+            case "bm":
+                throw new NotImplementedException();
+            case "mr":
+                ordered = await posts.Include("Reactions").ToListAsync();
+                ordered = ordered.Select(a => new Tuple<Activity, int>(a, CountRespect(a.Reactions)))
+                                    .OrderByDescending(t => t.Item2)
+                                    .Select(t => t.Item1)
+                                    .ToList();
+                break;
+            case "lr":
+                ordered = await posts.Include("Reactions").ToListAsync();
+                ordered = ordered.Select(a => new Tuple<Activity, int>(a, CountRespect(a.Reactions)))
+                                    .OrderBy(t => t.Item2)
+                                    .Select(t => t.Item1)
+                                    .ToList();   
+                break;
+            case "la":
+                ordered = await posts.OrderByDescending(a => a.Created).ToListAsync();               
+                break;
+            case "tr":
+                ordered = await posts.Include("Reactions").ToListAsync();
+                ordered = posts.Select(a => new Tuple<Activity, int>
+                (
+                    a, 
+                    CountRespect
+                    (
+                        a.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-trendingDays)).ToList()
+                    )
+                ))
+                .OrderBy(t => t.Item2)
+                .Select(t => t.Item1)
+                .ToList();
+                break;
+        }
+
+        return ordered;
+    }
 }
