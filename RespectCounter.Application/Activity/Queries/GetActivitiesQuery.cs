@@ -1,20 +1,11 @@
 using MediatR;
 using RespectCounter.Infrastructure.Repositories;
 using RespectCounter.Domain.Model;
+using Microsoft.IdentityModel.Tokens;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetActivitesQuery : IRequest<List<Activity>>
-    {
-        public string Search { get; set; } = "";
-        public string Order { get; set; } = "";
-
-        public GetActivitesQuery(string search, string order)
-        {
-            Search = search;
-            Order = string.IsNullOrEmpty(order) ? "la" : order;
-        }
-    }
+    public record GetActivitesQuery(string Search, string Order, List<ActivityStatus>? Status = null) : IRequest<List<Activity>>;
 
     public class GetActivitesQueryHandler : IRequestHandler<GetActivitesQuery, List<Activity>>
     {
@@ -27,16 +18,18 @@ namespace RespectCounter.Application.Queries
 
         public async Task<List<Activity>> Handle(GetActivitesQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<Activity> posts;
+            IQueryable<Activity> activities;
+            var status = request.Status == null || !request.Status.Any() ? [ActivityStatus.Verified, ActivityStatus.NotVerified] : request.Status!;
+
             if(string.IsNullOrEmpty(request.Search))
             {
-                posts = uow.Repository().FindQueryable<Activity>(p => p.Status != ActivityStatus.Hidden);
+                activities = uow.Repository().FindQueryable<Activity>(a => status.Contains(a.Status));
             }
             else
             {
                 var search = request.Search.ToLower();
-                posts = uow.Repository().FindQueryable<Activity>(
-                    a => a.Status != ActivityStatus.Hidden
+                activities = uow.Repository().FindQueryable<Activity>(
+                    a => status.Contains(a.Status)
                         && ( a.Value.ToLower().Contains(search)
                             || a.Source.ToLower().Contains(search)
                             || a.Description.ToLower().Contains(search)
@@ -45,7 +38,8 @@ namespace RespectCounter.Application.Queries
                 );
             }
             
-            return await RespectService.OrderActivitiesAsync(posts, request.Order);
+            var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;
+            return await RespectService.OrderActivitiesAsync(activities, order);
         }
     }
 }
