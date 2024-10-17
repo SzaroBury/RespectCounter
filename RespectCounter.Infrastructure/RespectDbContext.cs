@@ -24,6 +24,10 @@ namespace RespectCounter.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Person>().HasMany(p => p.Tags).WithMany(t => t.Persons).UsingEntity("PersonHasTag");
+            modelBuilder.Entity<Person>().HasMany(p => p.Activities).WithMany(a => a.Persons).UsingEntity("PersonHasActivity");
+            modelBuilder.Entity<Activity>().HasMany(p => p.Tags).WithMany(t => t.Activities).UsingEntity("ActivityHasTag");
+
             SeedData.Seed(modelBuilder);
             //The seeding code should not be part of the normal app execution as this can cause concurrency issues when multiple instances are running and would also require the app having permission to modify the database schema
             //https://learn.microsoft.com/en-us/ef/core/modeling/data-seeding#custom-initialization-logic

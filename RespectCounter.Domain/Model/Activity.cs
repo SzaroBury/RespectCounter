@@ -7,6 +7,7 @@ namespace RespectCounter.Domain.Model
     {
         public string Value { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
         public DateTime Happend { get; set; } = DateTime.MinValue;
         public string Source { get; set; } = string.Empty;
         public ActivityStatus Status { get; set; } = ActivityStatus.NotVerified;
