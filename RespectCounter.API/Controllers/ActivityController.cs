@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RespectCounter.Application.Queries;
+using RespectCounter.Domain.Model;
 
 namespace RespectCounter.API.Controllers;
 
@@ -40,6 +41,15 @@ public class ActivityController: ControllerBase
     public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "")
     {
         var query = new GetActivitesQuery(search, order);
+        var result = await mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpGet("/api/activities")]
+    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "")
+    {
+        var query = new GetActivitesQuery(search, order, [ActivityStatus.Verified]);
         var result = await mediator.Send(query);
 
         return Ok(result);
