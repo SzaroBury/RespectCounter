@@ -40,7 +40,7 @@ public class PersonController: ControllerBase
         this.mediator = mediator;
     }
 
-    #region Querries
+    #region Queries
     [HttpGet("/api/persons")]
     public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {
@@ -83,7 +83,7 @@ public class PersonController: ControllerBase
 
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposePerson([FromBody] NewPerson newPerson)
+    public async Task<IActionResult> ProposePerson([FromBody] PersonDTO newPerson)
     {
         var command = new AddPersonCommand(){ Person = newPerson };
         Person result = await mediator.Send(command);

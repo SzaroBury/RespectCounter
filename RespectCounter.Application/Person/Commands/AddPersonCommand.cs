@@ -7,7 +7,7 @@ namespace RespectCounter.Application.Commands
 {
     public record AddPersonCommand() : IRequest<Person>
     {
-        public required NewPerson Person { get; set; }
+        public required PersonDTO Person { get; set; }
     }
 
     public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
