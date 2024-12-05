@@ -11,6 +11,8 @@ namespace RespectCounter.Domain.Model
         public int Level { get; set; } = 5;
         public virtual List<Person> Persons { get; set; } = new();
         public virtual List<Activity> Activities { get; set; } = new();
-        public int Count => Persons.Count + Activities.Count;
+        public int CountActivities => Activities.Count;
+        public int CountPersons => Persons.Count;
+        public int Count => CountActivities + CountPersons;
     }
 }
