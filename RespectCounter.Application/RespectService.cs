@@ -109,6 +109,9 @@ public static class RespectService
             case "la":
                 ordered = await posts.OrderByDescending(a => a.Created).ToListAsync();               
                 break;
+            case "lh":
+                ordered = await posts.OrderByDescending(a => a.Happend).ToListAsync();               
+                break;
             case "tr":
                 ordered = await posts.Include("Reactions").ToListAsync();
                 ordered = posts.Select(a => new Tuple<Activity, int>
@@ -118,10 +121,11 @@ public static class RespectService
                     (
                         a.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-trendingDays)).ToList()
                     )
-                ))
+                )).ToList()
                 .OrderBy(t => t.Item2)
                 .Select(t => t.Item1)
                 .ToList();
+                
                 break;
         }
 
