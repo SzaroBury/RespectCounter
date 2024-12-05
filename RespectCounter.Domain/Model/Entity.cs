@@ -4,7 +4,7 @@ using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Domain.Model
 {
-    public class Entity: IEntity
+    public abstract class Entity
     {
         public Guid Id { get; set; }
         
