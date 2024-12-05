@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RespectCounter.Application.Queries;
+using RespectCounter.Application.Commands;
+using RespectCounter.Domain.DTO;
 using RespectCounter.Domain.Model;
 
 namespace RespectCounter.API.Controllers;
@@ -38,18 +40,18 @@ public class ActivityController: ControllerBase
 
     #region Queries
     [HttpGet("/api/activities/all")]
-    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "")
+    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tag = "")
     {
-        var query = new GetActivitesQuery(search, order);
+        var query = new GetActivitesQuery(search, order, tag);
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
     [HttpGet("/api/activities")]
-    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "")
+    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tag = "")
     {
-        var query = new GetActivitesQuery(search, order, [ActivityStatus.Verified]);
+        var query = new GetActivitesQuery(search, order, tag, [ActivityStatus.Verified]);
         var result = await mediator.Send(query);
 
         return Ok(result);
@@ -72,6 +74,63 @@ public class ActivityController: ControllerBase
     }
     #endregion
     
-    
+    #region Commands
+    [HttpPost]
+    public async Task<IActionResult> ProposePerson([FromBody] ActivityCommandDTO newActivity)
+    {
+        var command = new AddActivityCommand(newActivity);
+        Activity result = await mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/verify")]
+    public async Task<IActionResult> VerifyActivity(string id)
+    {
+        var command = new VerifyActivityCommand(id);
+        Activity result = await mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/reaction/{reaction}")]
+    public async Task<IActionResult> ReactionToActivity(string id, int reaction)
+    {
+        var command = new AddReactionToActivityCommand(id, reaction, User);
+        Activity result = await mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/comment")]
+    public async Task<IActionResult> CommentActivity(string id, [FromBody] string content)
+    {
+        var command = new AddCommentToActivityCommand(id, content, User);
+        Activity result = await mediator.Send(command);
+
+        return Ok(result);;
+    }
+
+    [HttpPost("{id}/tag/{tag}")]
+    public async Task<IActionResult> TagActivity(string id, string tag)
+    {
+        var command = new AddTagToActivityCommand(id, tag, User);
+        Activity result = await mediator.Send(command);
+
+        return Ok(result);
+    }
+
+    [HttpPut("{id}")]
+    public Task<IActionResult> ProposeUpdateActivity(string id, [FromBody] Activity activity)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPut("{id}/hide")]
+    public Task<IActionResult> HideActivity(string id)
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
     
 }
