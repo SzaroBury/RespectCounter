@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Domain.Model
 {
     public class Comment : Entity
     {
         public string Content { get; set; } = string.Empty;
+        public CommentStatus CommentStatus { get; set; } = CommentStatus.Created;
         
         public Guid? ActivityId { get; set; }
         public virtual Activity? Activity { get; set; }
@@ -16,5 +16,12 @@ namespace RespectCounter.Domain.Model
         public virtual Comment? Parent { get; set; }
         public virtual List<Reaction> Reactions { get; set; } = new();
         public virtual List<Comment> Children { get; set; } = new();
+    }
+
+    public enum CommentStatus
+    {
+        Created,
+        Edited,
+        Hidden
     }
 }
