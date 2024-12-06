@@ -1,18 +1,25 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Container from 'react-bootstrap/Container';
-import WeatherPage from '../../Pages/WeatherPage/WeatherPage';
+import AboutPage from '../../Pages/AboutPage/AboutPage';
 import HomePage from '../../Pages/HomePage/HomePage';
+import ActivitiesPage from '../../Pages/ActivitiesPage/ActivitiesPage';
+import PersonsPage from '../../Pages/PersonsPage/PersonsPage';
+import SignInPage from '../../Pages/SignInPage/SignInPage';
+
+import "./PageRenderer.css";
 
 const PageRenderer = () => {
     return (
-        <Container className="p-5 bg-light rounded-3">
+        <div className='page'>
             <Routes>
                 <Route exact path="/" element={<HomePage /> } />
-                <Route path="/weather" element={<WeatherPage />} />
-                {/*<Route path="*" element={<Navigate to="/" />} />*/}
+                <Route exact path="/events" element={<ActivitiesPage /> } />
+                <Route exact path="/persons" element={<PersonsPage /> } />
+                <Route exact path="/about" element={<AboutPage />} />
+                <Route exact path="/signin" element={<SignInPage />} />
+                {/* <Route path="*" element={<Navigate to="/" />} /> */}
             </Routes>
-        </Container>
+        </div>
     );
 };
 
