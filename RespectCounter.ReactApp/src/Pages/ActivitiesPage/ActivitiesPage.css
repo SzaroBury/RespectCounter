@@ -1,0 +1,70 @@
+.act-list {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.activity{
+    display: grid; 
+    grid-template-rows: auto 3em;
+    grid-template-columns: 15em auto;
+    column-gap: 15px;
+}
+
+.imageContainer {
+    text-align: center; /* Wyśrodkowuje obrazek i podpis */
+    margin: 0 auto; /* Wyśrodkowuje cały kontener */
+}
+
+.image {
+    max-width: 5vw;
+}
+
+.caption {
+    margin-top: 8px; /* Dodaje odstęp między obrazkiem a podpisem */ 
+    font-size: 16px;
+    color: #555;
+}
+
+.person {
+    align-items: center;
+    grid-row: span 2;
+}
+
+.personRate {
+    margin-top: 8px;
+    align-self: center;
+    align-items: center;
+}
+
+
+.contentContainer {
+    align-self: center;
+}
+
+.buttons {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
+}
+
+.source {
+    float: right;
+}
+
+.rating {
+    max-width: 100px;
+}
+
+.right {
+    float: right;
+    display: flex;
+}
+
+/* ul {
+    display: flex;
+} */
+
+li {
+    display: block;
+    margin: 5px;
+}
