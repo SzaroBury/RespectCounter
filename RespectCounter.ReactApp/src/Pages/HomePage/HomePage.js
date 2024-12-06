@@ -1,5 +1,6 @@
 import React from 'react';
-import Container from 'react-bootstrap/Container'
+import "./HomePage.css";
+
 
 class HomePage extends React.Component {
     static displayName = HomePage.name;
@@ -11,13 +12,23 @@ class HomePage extends React.Component {
 
     render() {
         return (
-            <Container>
-                <h1 className="header text-center">Welcome To Public Figures</h1>
-                <p className="m-5 text-justify">&#9;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque rhoncus eros et nibh tristique, ac cursus libero sagittis. Morbi iaculis sapien luctus lectus viverra hendrerit. Sed fermentum viverra mauris eu ullamcorper. Quisque vestibulum massa eros, ac interdum lectus tristique vel. Sed sem est, condimentum eget scelerisque vitae, aliquam nec sem. Aliquam finibus iaculis dignissim. Suspendisse sagittis ligula at viverra cursus. Etiam molestie, dui nec feugiat porttitor, ipsum libero accumsan justo, id dictum ipsum ligula ut mauris. Praesent lacus libero, cursus dignissim cursus porta, volutpat sit amet odio. Nam interdum bibendum dolor nec facilisis. Morbi ut tortor sed massa elementum semper non ultrices ante. Duis faucibus nunc at sapien maximus vestibulum</p>
-            </Container>
+            <>
+                <div className='home-page'>
+                    <h1 className="text-center">Welcome To Respect Counter</h1>
+                    <p className="text-center">See what it is <a href="/about">about</a>.</p>
+
+                    <h2>Trending Events</h2>
+                    <a href="/events">See more</a>
+
+                    <br/>
+                    
+                    <h2>Trending Persons</h2>
+                    <a href='/persons'>See more</a>
+
+                </div>
+            </>
         );
     }
 }
 
 export default HomePage;
-
