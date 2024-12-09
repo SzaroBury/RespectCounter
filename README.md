@@ -1,6 +1,6 @@
 # RespectCounter (work in progress)
 
-Simple .NET + React application that allows users to express their opinion on various public figures, their quotes and actions.
+.NET + React application that allows users to express their opinion on various public figures, their quotes and actions.
 
 ## Target main functionalities:
 - Users can propose public figures.
@@ -11,18 +11,6 @@ Simple .NET + React application that allows users to express their opinion on va
 - Moderators can verify public figures, quotes and activities added by users.
 - Moderators can create verified public figures, quotes and activities.
 - Moderators can hide comments and activities.
-
-## To do in frontend:
-- Home page - trending and latest added activities, quotes and public figures
-- Person page - list of public figures
-- Page with details of an activity/quote - more detailed reactions and comments
-- Page with details of a public figure - description, respect, comments and activities
-- Page for moderators - verifying persons and activities
-
-## To do in backend:
-- Pictures: for user avatars, for persons, for activities
-- Custom user class
-- Reports
 
 ## Installation
 - Clone repository: `git clone https://github.com/SzaroBury/RespectCounter.git`
@@ -47,3 +35,18 @@ Simple .NET + React application that allows users to express their opinion on va
 - Tag
 
 ![image](RespectCounterERD.png)
+
+## To do in frontend:
+- Home page - trending and latest added activities, quotes and public figures
+- Person page - list of public figures
+- Event page - tags
+- Page with details of an activity/quote - more detailed reactions and comments
+- Page with details of a public figure - description, respect, comments and activities
+- Page to add new public figure
+- Page to add new activity/quote
+- Page for moderators - verifying persons and activities
+
+## To do in backend:
+- Pictures: for user avatars, for persons, for activities
+- Custom user class
+- Reports
