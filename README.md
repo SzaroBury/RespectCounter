@@ -1,44 +1,33 @@
 # RespectCounter (work in progress)
 
-Simple React + ASP.NET Core Web API application that allows users to express their opinion on various public figures, their quotes and actions.
+Simple .NET + React application that allows users to express their opinion on various public figures, their quotes and actions.
 
 ## Target main functionalities:
-- Regular users can add quotes, comments, reactions and propositons for persons and activities.
-- Moderators can accept propositions created by users
-- Users can vote for other users propositions
-- Moderators can additionaly add new public figures
-- Searching activities by people tags
+- Users can propose public figures.
+- Users can add quotes/activities and link them to stored public figures.
+- Users can comment and react to persons, activities and other comments.
+- Users can search quotes, activities and persons by tags.
+- Users can report activities, comments.
+- Moderators can verify public figures, quotes and activities added by users.
+- Moderators can create verified public figures, quotes and activities.
+- Moderators can hide comments and activities.
 
 ## To do in frontend:
-- Activity component - event or quote, reactions
-- Home page - latest and most reacted activities, persons
-- Detailed activity page - more detailed reactions and comments
-- Details of person page- description, respect, comments and activities
+- Home page - trending and latest added activities, quotes and public figures
+- Person page - list of public figures
+- Page with details of an activity/quote - more detailed reactions and comments
+- Page with details of a public figure - description, respect, comments and activities
 - Page for moderators - verifying persons and activities
 
 ## To do in backend:
-- Person controller
-    - ~~creating an endpoint for getting only verified persons~~
-    - ~~creating an endpoint for getting all persons~~
-    - ~~creating an endpoint for getting a person by id~~
-    - ~~creating an endpoint for proposing a new person~~
-    - creating an endpoint for veryfing a person
-    - creating an endpoint for adding a reaction to a person
-    - creating an endpoint for adding a comment to a person
-    - creating an endpoint for adding a tag to a person
-    - creating an endpoint for proposing a change in person data
-    - creating an endpoint for hiding a person
-- To understand and implement .NET Identity
-- MockRepo
-- Activity and Comment controllers
-    - write down the list of enpoints to implement
+- Pictures: for user avatars, for persons, for activities
 - Custom user class
-- Pictures: for user avatars, for person, for activities
+- Reports
 
-## To run the app:
-- dotnet-ef update datebase
-- dotnet run
-- npm start
+## Installation
+- Clone repository: `git clone https://github.com/SzaroBury/RespectCounter.git`
+- Start the API `dotnet run --project .\RespectCounter.API\`
+- Start the ReactApp in another terminal `cd .\RespectCounter.ReactApp\; npm start `
 
 ## Technicalities:
 - .NET 8
