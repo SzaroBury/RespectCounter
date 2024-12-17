@@ -1,12 +1,19 @@
 using MediatR;
-using MediatR.Pipeline;
-using RespectCounter.Domain.DTO;
 using RespectCounter.Domain.Model;
 using RespectCounter.Infrastructure.Repositories;
 
 namespace RespectCounter.Application.Commands;
 
-public record AddActivityCommand(ActivityCommandDTO Activity) : IRequest<Activity>;
+public record AddActivityCommand(
+    string Persons,
+    string Value, 
+    string Description, 
+    string Location, 
+    string Happend, 
+    string Source, 
+    int Type, 
+    string Tags
+) : IRequest<Activity>;
 
 public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Activity>
 {
@@ -22,12 +29,12 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
         DateTime now = DateTime.Now;
         Guid newId = Guid.NewGuid();
         
-        if(!DateTime.TryParse(request.Activity.Happend, out DateTime happend))
+        if(!DateTime.TryParse(request.Happend, out DateTime happend))
         {
             throw new ArgumentException("Invalid date format.");
         }
 
-        var type = (ActivityType)request.Activity.Type;
+        var type = (ActivityType)request.Type;
         if(!Enum.IsDefined(typeof(ActivityType), type))
             throw new ArgumentException("Invalid Type value.");
         
@@ -35,10 +42,10 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
         Activity? newActivity = new Activity
         {
             Id = newId,
-            Value = request.Activity.Value,
-            Location = request.Activity.Location,
-            Description = request.Activity.Description,
-            Source = request.Activity.Source,
+            Value = request.Value,
+            Location = request.Location,
+            Description = request.Description,
+            Source = request.Source,
             Type = type,
             Happend = happend,
 
@@ -48,7 +55,7 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
             LastUpdatedById = "sys"
         };
 
-        List<string> persons = request.Activity.Persons.Split(",").ToList();
+        List<string> persons = request.Persons.Split(",").ToList();
         foreach(string personId in persons)
         {
             if(!Guid.TryParse(personId, out Guid personGuid))
@@ -64,7 +71,7 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
             newActivity.Persons.Add(person);
         }
 
-        List<string> tags = request.Activity.Tags.Split(",").ToList();
+        List<string> tags = request.Tags.Split(",").ToList();
         foreach(string tag in tags)
         {
             Tag? existingTag = uow.Repository().FindQueryable<Tag>(t => t.Name.ToLower() == tag.ToLower()).FirstOrDefault();

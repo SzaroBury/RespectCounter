@@ -2,8 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RespectCounter.Application.Queries;
 using RespectCounter.Application.Commands;
-using RespectCounter.Domain.DTO;
 using RespectCounter.Domain.Model;
+using RespectCounter.API.Models;
 
 namespace RespectCounter.API.Controllers;
 
@@ -76,9 +76,17 @@ public class ActivityController: ControllerBase
     
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposePerson([FromBody] ActivityCommandDTO newActivity)
+    public async Task<IActionResult> ProposeActivity([FromBody] CreateActivityModel newActivity)
     {
-        var command = new AddActivityCommand(newActivity);
+        var command = new AddActivityCommand(
+            newActivity.Persons, 
+            newActivity.Value, 
+            newActivity.Description, 
+            newActivity.Location, 
+            newActivity.Happend, 
+            newActivity.Source, 
+            newActivity.Type, 
+            newActivity.Tags);
         Activity result = await mediator.Send(command);
 
         return Ok(result);

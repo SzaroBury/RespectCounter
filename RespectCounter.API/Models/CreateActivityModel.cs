@@ -1,6 +1,6 @@
-namespace RespectCounter.Application.DTOs;
+namespace RespectCounter.API.Models;
 
-public record ActivityCommandDTO(
+public record CreateActivityModel(
     string Persons,
     string Value, 
     string Description, 
