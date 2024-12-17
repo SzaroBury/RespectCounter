@@ -22,7 +22,7 @@ namespace RespectCounter.Application.Queries
             if (act is null)
                 throw new KeyNotFoundException("The activity was not found. Please enter Id of the existing activity.");
 
-            return RespectService.MapActivityToQueryDTO(act);
+            return MappingService.MapActivityToQueryDTO(act);
         }
     }
 }
