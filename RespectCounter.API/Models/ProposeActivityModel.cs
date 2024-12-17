@@ -1,6 +1,6 @@
 namespace RespectCounter.API.Models;
 
-public record CreateActivityModel(
+public record ProposeActivityModel(
     string Persons,
     string Value, 
     string Description, 

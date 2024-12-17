@@ -76,7 +76,7 @@ public class ActivityController: ControllerBase
     
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposeActivity([FromBody] CreateActivityModel newActivity)
+    public async Task<IActionResult> ProposeActivity([FromBody] ProposeActivityModel newActivity)
     {
         var command = new AddActivityCommand(
             newActivity.Persons, 
