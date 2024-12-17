@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RespectCounter.API.Models;
 using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
-using RespectCounter.Domain.DTO;
 using RespectCounter.Domain.Model;
 
 namespace RespectCounter.API.Controllers;
@@ -83,9 +83,17 @@ public class PersonController: ControllerBase
 
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposePerson([FromBody] PersonDTO newPerson)
+    public async Task<IActionResult> ProposePerson([FromBody] ProposePersonModel newPerson)
     {
-        var command = new AddPersonCommand(){ Person = newPerson };
+        var command = new AddPersonCommand(
+            newPerson.FirstName, 
+            newPerson.LastName, 
+            newPerson.Description, 
+            newPerson.Nationality, 
+            newPerson.Birthday, 
+            newPerson.DeathDate, 
+            newPerson.Tags
+        );
         Person result = await mediator.Send(command);
 
         return Ok(result);

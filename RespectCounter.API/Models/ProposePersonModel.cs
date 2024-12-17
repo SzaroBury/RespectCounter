@@ -1,6 +1,6 @@
-namespace RespectCounter.Application.DTOs;
+namespace RespectCounter.API.Models;
 
-public record PersonDTO(
+public record ProposePersonModel(
     string FirstName, 
     string LastName, 
     string Description, 
