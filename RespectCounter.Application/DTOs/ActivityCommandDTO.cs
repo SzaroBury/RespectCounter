@@ -1,4 +1,4 @@
-namespace RespectCounter.Domain.DTO;
+namespace RespectCounter.Application.DTOs;
 
 public record ActivityCommandDTO(
     string Persons,

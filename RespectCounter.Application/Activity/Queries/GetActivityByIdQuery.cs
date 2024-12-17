@@ -1,7 +1,7 @@
 using MediatR;
 using RespectCounter.Domain.Model;
 using RespectCounter.Infrastructure.Repositories;
-using RespectCounter.Domain.DTO;
+using RespectCounter.Application.DTOs;
 
 namespace RespectCounter.Application.Queries
 {

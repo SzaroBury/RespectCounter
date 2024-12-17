@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using RespectCounter.Domain.DTO;
+using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 
 namespace RespectCounter.Application;
