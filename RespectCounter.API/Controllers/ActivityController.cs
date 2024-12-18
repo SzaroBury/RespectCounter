@@ -57,6 +57,22 @@ public class ActivityController: ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}/comments")]
+    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2)
+    {
+        var query = new GetCommentsForActivityQuery(id, level);
+
+        try
+        {
+            var result = await mediator.Send(query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetActivity(string id)
     {
