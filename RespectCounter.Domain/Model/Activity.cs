@@ -14,7 +14,7 @@ namespace RespectCounter.Domain.Model
         public ActivityType Type { get; set; } = ActivityType.Event;
         public Guid PersonId { get; set; }
         [Required]
-        public virtual Person? Person { get; set; }
+        public virtual Person Person { get; set; }
         public virtual List<Reaction> Reactions { get; set; } = new();
         public virtual List<Comment> Comments { get; set; } = new();
         public virtual List<Tag> Tags { get; set; } = new();
