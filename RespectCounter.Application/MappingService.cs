@@ -26,4 +26,21 @@ public static class MappingService
             RespectService.CountRespect(a.Reactions)
         );
     } 
+
+    public static CommentDTO MapCommentToDTO(Comment c)
+    {
+        return new CommentDTO(
+            c.Id.ToString(),
+            c.CreatedBy?.UserName ?? "??",
+            c.CreatedById,
+            c.Content, 
+            c.ActivityId?.ToString() ?? "",
+            c.PersonId?.ToString() ?? "",
+            c.ParentId?.ToString() ?? "",
+            (int)c.CommentStatus,
+            RespectService.CountRespect(c.Reactions),
+            c.Children.Count,
+            0
+        );
+    }
 }
