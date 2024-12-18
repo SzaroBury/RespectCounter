@@ -28,21 +28,9 @@ namespace RespectCounter.Infrastructure
             Guid RKactivity = Guid.NewGuid();
             mb.Entity<Activity>().HasData(new List<Activity>
             {
-                CreateDummyActivity(RLactivity, "Milik jest słaby", "", "", "Dude, just trust me", type: ActivityType.Quote),
-                CreateDummyActivity(RKactivity, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Monaco, MC", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", happend: new DateTime(2010, 05, 15), status: ActivityStatus.Verified)
+                CreateDummyActivity(RLactivity, RL, "Milik jest słaby", "", "", "Dude, just trust me", type: ActivityType.Quote),
+                CreateDummyActivity(RKactivity, RK, "Monaco GP 2010: Robeeeeeeeert Kubica P2 in Quali", "Monaco, MC", "Można utknąć w eeeee korku", "https://www.youtube.com/watch?v=qbYMoKxif6I", happend: new DateTime(2010, 05, 15), status: ActivityStatus.Verified)
             });
-            mb.Entity("PersonHasActivity").HasData(
-                new { ActivitiesId = RLactivity, PersonsId = RL }, // RL -> Quote
-                new { ActivitiesId = RKactivity, PersonsId = RK } // RK -> Monaco P2
-            );
-            // mb.Entity<Activity>().HasMany(a => a.Persons).WithMany(a => a.Activities)
-            //     .UsingEntity<Dictionary<string, object>>(
-            //     "PersonHasActivity",
-            //     AP => AP.HasData(
-            //         new { ActivitiesId = RLactivity, PersonsId = RL }, // RL -> Quote
-            //         new { ActivitiesId = RKactivity, PersonsId = RK } // RK -> Monaco P2
-            //     )
-            // );
 
             Guid RLComment = Guid.NewGuid();
             Guid RLActivityComment = Guid.NewGuid();
@@ -95,23 +83,6 @@ namespace RespectCounter.Infrastructure
                 new { TagsId = pisTag, PersonsId = AD },
                 new { TagsId = poTag, PersonsId = DT }
             );
-            // mb.Entity<Person>().HasMany(p => p.Tags).WithMany(t => t.Persons)
-            //     .UsingEntity<Dictionary<string, object>>
-            //     (
-            //         "PersonHasTag",
-            //         TP => TP.HasData(
-            //             new { TagsId = sportTag, PersonsId = RL },
-            //             new { TagsId = sportTag, PersonsId = RK },
-            //             new { TagsId = footballTag, PersonsId = RL },
-            //             new { TagsId = fcbarcelonaTag, PersonsId = RL },
-            //             new { TagsId = f1Tag, PersonsId = RK },
-            //             new { TagsId = wecTag, PersonsId = RK },
-            //             new { TagsId = politicsTag, PersonsId = AD },
-            //             new { TagsId = politicsTag, PersonsId = DT },
-            //             new { TagsId = pisTag, PersonsId = AD },
-            //             new { TagsId = poTag, PersonsId = DT }
-            //         )
-            //     );
             mb.Entity<Reaction>().HasData(new List<Reaction>
             {
                 CreateDummyReaction(Guid.NewGuid(), ReactionType.Hate,           perId: RL),
@@ -192,7 +163,7 @@ namespace RespectCounter.Infrastructure
                 LastUpdatedById = SysUser?.Id ?? "sys"
             };
         }
-        private static Activity CreateDummyActivity(Guid id, string val, string loc, string desc, string source, DateTime? happend = null, ActivityType type = ActivityType.Quote, ActivityStatus status = ActivityStatus.NotVerified)
+        private static Activity CreateDummyActivity(Guid id, Guid personId, string val, string loc, string desc, string source, DateTime? happend = null, ActivityType type = ActivityType.Quote, ActivityStatus status = ActivityStatus.NotVerified)
         {
             return new Activity
             {
@@ -204,7 +175,7 @@ namespace RespectCounter.Infrastructure
                 Type = type,
                 Source = source,
                 Status = status,
-                //Person
+                PersonId = personId,
                 //Reactions
                 //Comments
 

@@ -22,7 +22,7 @@ namespace RespectCounter.Application.Queries
             var status = request.Status == null || !request.Status.Any() ? [ActivityStatus.Verified, ActivityStatus.NotVerified] : request.Status!;
             IQueryable<Activity> activities = uow.Repository().FindQueryable<Activity>(
                 a => status.Contains(a.Status)
-            ).Include("Persons").Include("Comments").Include("Reactions").Include("Tags").Include("CreatedBy");
+            ).Include("Person").Include("Comments").Include("Reactions").Include("Tags").Include("CreatedBy");
 
             if(!string.IsNullOrEmpty(request.Search))
             {
@@ -38,7 +38,7 @@ namespace RespectCounter.Application.Queries
             {
                 var tag = request.Tag.ToLower();
                 activities = activities.Where(a => a.Tags.Any(t => t.Name.ToLower() == tag)
-                            || a.Persons.Any(p => p.Tags.Any(pt => pt.Name.ToLower() == tag))
+                            || a.Person.Tags.Any(pt => pt.Name.ToLower() == tag)
                         );
             }
             

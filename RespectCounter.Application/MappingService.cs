@@ -9,10 +9,10 @@ public static class MappingService
     {
         return new ActivityQueryDTO(
             a.Id.ToString(),
-            string.Join(",", a.Persons.Select(p => p.Id.ToString())),
-            string.Join(",", a.Persons.Select(p => p.FirstName + " " + p.LastName)),
-            string.Join(",", a.Persons.Select(p => RespectService.CountRespect(p.Reactions))),
-            string.Join(",", a.Persons.Select(p => "/persons/person_" + p.LastName.ToLower() + ".jpg")),
+            a.Person.Id.ToString(),
+            a.Person.FirstName + " " + a.Person.LastName,
+            RespectService.CountRespect(a.Person.Reactions).ToString(),
+            "/persons/person_" + a.Person.LastName.ToLower() + ".jpg",
             a.CreatedBy?.UserName ?? "??",
             a.CreatedById,
             a.Value,

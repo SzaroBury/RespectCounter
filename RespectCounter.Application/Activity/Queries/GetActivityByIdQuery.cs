@@ -18,7 +18,7 @@ namespace RespectCounter.Application.Queries
 
         public async Task<ActivityQueryDTO> Handle(GetActivityByIdQuery request, CancellationToken cancellationToken)
         {
-            var act = await uow.Repository().SingleOrDefaultAsync<Activity>(p => p.Id.ToString() == request.Id, "Persons,Tags,Comments,Reactions,CreatedBy");
+            var act = await uow.Repository().SingleOrDefaultAsync<Activity>(p => p.Id.ToString() == request.Id, "Person,Tags,Comments,Reactions,CreatedBy");
             if (act is null)
                 throw new KeyNotFoundException("The activity was not found. Please enter Id of the existing activity.");
 

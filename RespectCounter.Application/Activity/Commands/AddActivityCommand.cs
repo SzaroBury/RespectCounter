@@ -5,7 +5,7 @@ using RespectCounter.Infrastructure.Repositories;
 namespace RespectCounter.Application.Commands;
 
 public record AddActivityCommand(
-    string Persons,
+    string Person,
     string Value, 
     string Description, 
     string Location, 
@@ -55,21 +55,17 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
             LastUpdatedById = "sys"
         };
 
-        List<string> persons = request.Persons.Split(",").ToList();
-        foreach(string personId in persons)
+        if(!Guid.TryParse(request.Person, out Guid personGuid))
         {
-            if(!Guid.TryParse(personId, out Guid personGuid))
-            {
-                throw new ArgumentException($"Invalid person guid format: '{personId}'");
-            }
-
-            Person? person = uow.Repository().FindQueryable<Person>(p => p.Id == personGuid).FirstOrDefault();
-            if(person == null)
-            {
-                throw new ArgumentException($"Person with given id was not found: '{personId}'");
-            }
-            newActivity.Persons.Add(person);
+            throw new ArgumentException($"Invalid person guid format: '{request.Person}'");
         }
+
+        Person? person = uow.Repository().FindQueryable<Person>(p => p.Id == personGuid).FirstOrDefault();
+        if(person == null)
+        {
+            throw new ArgumentException($"Person with given id was not found: '{request.Person}'");
+        }
+        newActivity.Person = person;
 
         List<string> tags = request.Tags.Split(",").ToList();
         foreach(string tag in tags)
