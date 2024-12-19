@@ -11,4 +11,4 @@ public record CommentDTO(
     int Status,
     int Respect,
     int ChildrenCount,
-    int Level);
+    List<CommentDTO> Children);
