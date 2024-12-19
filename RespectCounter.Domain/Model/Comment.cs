@@ -16,6 +16,7 @@ namespace RespectCounter.Domain.Model
         public virtual Comment? Parent { get; set; }
         public virtual List<Reaction> Reactions { get; set; } = new();
         public virtual List<Comment> Children { get; set; } = new();
+        public int ChildrenCount => Children.Count + Children.Sum(c => c.ChildrenCount);
     }
 
     public enum CommentStatus
