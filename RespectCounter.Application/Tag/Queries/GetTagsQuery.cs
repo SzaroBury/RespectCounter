@@ -2,7 +2,6 @@ using MediatR;
 using RespectCounter.Infrastructure.Repositories;
 using RespectCounter.Domain.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace RespectCounter.Application.Queries
 {
@@ -27,7 +26,10 @@ namespace RespectCounter.Application.Queries
 
         public async Task<List<Tag>> Handle(GetTagsQuery request, CancellationToken cancellationToken)
         {
-            return await uow.Repository().FindQueryable<Tag>(t => t.Level > 0).Include("Activities").Include("Persons").OrderByDescending(t => t.Activities.Count + t.Persons.Count).ToListAsync(cancellationToken);
+            return await uow.Repository().FindQueryable<Tag>(t => t.Level > 0)
+                .Include("Activities").Include("Persons")
+                .OrderByDescending(t => t.Activities.Count + t.Persons.Count)
+                .ToListAsync(cancellationToken);
         }
     }
 }
