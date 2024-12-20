@@ -22,7 +22,7 @@ namespace RespectCounter.Application.Queries
             var status = request.Status == null || !request.Status.Any() ? [ActivityStatus.Verified, ActivityStatus.NotVerified] : request.Status!;
             IQueryable<Activity> activities = uow.Repository().FindQueryable<Activity>(
                 a => status.Contains(a.Status)
-            ).Include("Person").Include("Comments").Include("Reactions").Include("Tags").Include("CreatedBy");
+            ).Include("Person").Include("Comments.Children").Include("Reactions").Include("Tags").Include("CreatedBy");
 
             if(!string.IsNullOrEmpty(request.Search))
             {
