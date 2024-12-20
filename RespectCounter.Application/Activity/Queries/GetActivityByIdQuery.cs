@@ -5,9 +5,9 @@ using RespectCounter.Application.DTOs;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetActivityByIdQuery(string Id) : IRequest<ActivityQueryDTO>;
+    public record GetActivityByIdQuery(string Id) : IRequest<ActivityDTO>;
 
-    public class GetActivityByIdQueryHandler : IRequestHandler<GetActivityByIdQuery, ActivityQueryDTO>
+    public class GetActivityByIdQueryHandler : IRequestHandler<GetActivityByIdQuery, ActivityDTO>
     {
         private readonly IUnitOfWork uow;
         
@@ -16,13 +16,13 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<ActivityQueryDTO> Handle(GetActivityByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ActivityDTO> Handle(GetActivityByIdQuery request, CancellationToken cancellationToken)
         {
             var act = await uow.Repository().SingleOrDefaultAsync<Activity>(p => p.Id.ToString() == request.Id, "Person,Tags,Comments,Reactions,CreatedBy");
             if (act is null)
                 throw new KeyNotFoundException("The activity was not found. Please enter Id of the existing activity.");
 
-            return MappingService.MapActivityToQueryDTO(act);
+            return MappingService.MapActivityToDTO(act);
         }
     }
 }

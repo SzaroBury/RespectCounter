@@ -5,9 +5,9 @@ namespace RespectCounter.Application;
 
 public static class MappingService
 {
-    public static ActivityQueryDTO MapActivityToQueryDTO(Activity a)
+    public static ActivityDTO MapActivityToDTO(Activity a)
     {
-        return new ActivityQueryDTO(
+        return new ActivityDTO(
             a.Id.ToString(),
             a.Person.Id.ToString(),
             a.Person.FirstName + " " + a.Person.LastName,

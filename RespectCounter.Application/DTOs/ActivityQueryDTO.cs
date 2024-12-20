@@ -1,6 +1,6 @@
 namespace RespectCounter.Application.DTOs;
 
-public record ActivityQueryDTO(
+public record ActivityDTO(
     string Id,
     string PersonId,
     string PersonName,

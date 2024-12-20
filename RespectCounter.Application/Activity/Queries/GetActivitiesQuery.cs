@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetActivitesQuery(string Search, string Order, string Tag, List<ActivityStatus>? Status = null) : IRequest<List<ActivityQueryDTO>>;
+    public record GetActivitesQuery(string Search, string Order, string Tag, List<ActivityStatus>? Status = null) : IRequest<List<ActivityDTO>>;
 
-    public class GetActivitesQueryHandler : IRequestHandler<GetActivitesQuery, List<ActivityQueryDTO>>
+    public class GetActivitesQueryHandler : IRequestHandler<GetActivitesQuery, List<ActivityDTO>>
     {
         private readonly IUnitOfWork uow;
 
@@ -17,7 +17,7 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<List<ActivityQueryDTO>> Handle(GetActivitesQuery request, CancellationToken cancellationToken)
+        public async Task<List<ActivityDTO>> Handle(GetActivitesQuery request, CancellationToken cancellationToken)
         {
             var status = request.Status == null || !request.Status.Any() ? [ActivityStatus.Verified, ActivityStatus.NotVerified] : request.Status!;
             IQueryable<Activity> activities = uow.Repository().FindQueryable<Activity>(
@@ -45,7 +45,7 @@ namespace RespectCounter.Application.Queries
             var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;        
             var ordered = await RespectService.OrderActivitiesAsync(activities, order);
             var result = ordered.Select(
-                a => MappingService.MapActivityToQueryDTO(a)
+                a => MappingService.MapActivityToDTO(a)
             );
             return result.ToList();
         }
