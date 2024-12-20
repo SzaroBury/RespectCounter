@@ -27,7 +27,7 @@ public static class MappingService
         );
     } 
 
-    public static CommentDTO MapCommentToDTO(Comment c, int levelsToSearch)
+    public static CommentDTO ToCommentDTO(this Comment c, int levelsToSearch)
     {
         return new CommentDTO(
             c.Id.ToString(),
@@ -40,7 +40,7 @@ public static class MappingService
             (int)c.CommentStatus,
             RespectService.CountRespect(c.Reactions),
             c.ChildrenCount,
-            levelsToSearch > 0 ? c.Children.Select(ch => MapCommentToDTO(ch, levelsToSearch - 1)).ToList() : []
+            levelsToSearch > 0 ? c.Children.Select(ch => ch.ToCommentDTO(levelsToSearch - 1)).ToList() : []
         );
     }
 }

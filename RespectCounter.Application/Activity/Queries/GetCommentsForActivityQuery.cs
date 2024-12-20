@@ -27,7 +27,7 @@ public class GetCommentsForActivityQueryHandler : IRequestHandler<GetCommentsFor
         var result = await uow.Repository()
             .FindQueryable<Comment>(c => c.ActivityId == actGuid && c.CommentStatus != CommentStatus.Hidden)
             .Include("Children").Include("Reactions").Include("CreatedBy")
-            .Select(c => MappingService.MapCommentToDTO(c, request.levels))
+            .Select(c => c.ToCommentDTO(request.levels))
             .ToListAsync();
         return result;
     }
