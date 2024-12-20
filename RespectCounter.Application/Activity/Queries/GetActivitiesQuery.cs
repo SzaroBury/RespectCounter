@@ -45,7 +45,7 @@ namespace RespectCounter.Application.Queries
             var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;        
             var ordered = await RespectService.OrderActivitiesAsync(activities, order);
             var result = ordered.Select(
-                a => MappingService.MapActivityToDTO(a)
+                a => a.ToActivityDTO()
             );
             return result.ToList();
         }
