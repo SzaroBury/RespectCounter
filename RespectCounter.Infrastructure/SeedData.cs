@@ -34,6 +34,7 @@ namespace RespectCounter.Infrastructure
 
             Guid RLComment = Guid.NewGuid();
             Guid RLActivityComment = Guid.NewGuid();
+            Guid RLActivityNegativeComment = Guid.NewGuid();
             Guid ADComment = Guid.NewGuid();
  
             mb.Entity<Comment>().HasData(new List<Comment>
@@ -43,7 +44,9 @@ namespace RespectCounter.Infrastructure
                 CreateDummyComment(Guid.NewGuid(), "Jest całkiem dobry faktycznie",     parentId: RLComment),
                 CreateDummyComment(RLActivityComment, "Fajność!",                       actId: RLactivity),
                 CreateDummyComment(Guid.NewGuid(), "Zgadza się!",                       parentId: RLActivityComment),
-                CreateDummyComment(Guid.NewGuid(), "Niefajność",                        actId: RLactivity),             
+                CreateDummyComment(Guid.NewGuid(), "Też się zgadzam. Fajność!",         parentId: RLActivityComment),
+                CreateDummyComment(RLActivityNegativeComment, "Niefajność",             actId: RLactivity),             
+                CreateDummyComment(Guid.NewGuid(), "Nie zgadzam się. Fajność.",         parentId: RLActivityNegativeComment),             
                 CreateDummyComment(Guid.NewGuid(), "Lepsza weeeeeersja: https://www.youtube.com/watch?v=vmLonweq6wA", actId: RKactivity),
                 CreateDummyComment(ADComment, "Bardzo memiczna osoba",                  perId: AD),
                 CreateDummyComment(Guid.NewGuid(), "Hańba!",                            parentId : ADComment),
