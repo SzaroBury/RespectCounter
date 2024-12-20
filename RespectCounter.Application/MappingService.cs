@@ -21,7 +21,7 @@ public static class MappingService
             a.Source,
             string.Join(",", a.Tags),
             a.Happend.ToLongDateString(),
-            a.Comments.Count,
+            a.Comments.Count + a.Comments.Sum(c => c.ChildrenCount),
             (int)a.Type,
             RespectService.CountRespect(a.Reactions)
         );
