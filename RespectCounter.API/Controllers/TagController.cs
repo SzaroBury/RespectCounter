@@ -39,7 +39,28 @@ public class TagController: ControllerBase
             };
             return StatusCode(500, errorResponse);
         }
-        
+    }
+
+    [HttpGet("/api/tags/simple")]
+    public async Task<IActionResult> GetSimpleTags()
+    {
+        try
+        {
+            var query = new GetSimpleTagsQuery();
+            var result = await mediator.Send(query);
+
+            return Ok(result);
+        }
+        catch(Exception e)
+        {
+            var errorResponse = new
+            {
+                Status = 500,
+                Title = "Internal Server Error",
+                Detail = $"An unexpected error occurred: '{e.Message}'."
+            };
+            return StatusCode(500, errorResponse);
+        }
     }
 
     [HttpGet("/api/tags/recent")]
