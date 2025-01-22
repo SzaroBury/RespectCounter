@@ -1,21 +1,14 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 using RespectCounter.Infrastructure.Repositories;
-using System.Net;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetPersonByIdQuery : IRequest<Person>
-    {
-        public string Id { get; init; } = "";
-        
-        public GetPersonByIdQuery(string id)
-        {
-            Id = id;
-        }
-    }
+    public record GetPersonByIdQuery(string Id) : IRequest<PersonDTO>;
 
-    public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, Person>
+    public class GetPersonByIdQueryHandler : IRequestHandler<GetPersonByIdQuery, PersonDTO>
     {
         private readonly IUnitOfWork uow;
         
@@ -24,13 +17,18 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<Person> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
+        public async Task<PersonDTO> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
         {
-            var person = await uow.Repository().SingleOrDefaultAsync<Person>(p => p.Id.ToString() == request.Id, "Tags,Comments,Activities,Reactions");
+            var person = await uow.Repository().FindQueryable<Person>(p => p.Id.ToString() == request.Id)
+                .Include(p => p.Tags)
+                .Include(p => p.Comments)
+                .Include(p => p.Activities)
+                .Include(p => p.Reactions)
+                .FirstOrDefaultAsync(cancellationToken);
             if (person is null)
                 throw new KeyNotFoundException("Person not found. Please enter the existing Person Id.");
 
-            return person;
+            return person.ToDTO();
         }
     }
 }
