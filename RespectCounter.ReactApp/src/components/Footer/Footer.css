@@ -1,0 +1,11 @@
+.footer {
+    position: absolute;
+    bottom: 0px;
+    right: var(--rc-rigth-margin);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 25px 25px 0px 0px;
+    background-color: var(--bs-secondary-bg);
+    padding: 2px;
+    padding-left: 25px;
+    padding-right: 25px;
+  }
