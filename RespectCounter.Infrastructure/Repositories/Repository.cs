@@ -61,11 +61,6 @@ namespace RespectCounter.Infrastructure.Repositories
             dbContext.Entry(entity).State = EntityState.Modified;
         }
 
-        // public void UpdateRange<T>(IEnumerable<T> entities) where T : IEntity
-        // {
-        //     _dbContext.Set<T>().UpdateRange(entities);
-        // }
-
         public void Delete<T>(T entity) where T : Entity
         {
             dbContext.Set<T>().Remove(entity);
