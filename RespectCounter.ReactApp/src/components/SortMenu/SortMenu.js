@@ -35,9 +35,10 @@ function BrowseSection({page, onSortOptionChangeClick}) {
     ];
 
     const optionsPersons = [
-        { name: "be", displayName:"Best" },
-        { name: "wr" , displayName:"Worst" },
-        { name: "al", displayName:"Alphabetical" },
+        { name: "mr", displayName:"Most Respected" },
+        { name: "lr" , displayName:"Worst" },
+        { name: "la" , displayName:"Latest added" },
+        { name: "Az", displayName:"Alphabetical" },
         { name: "tr", displayName:"Trending" },
     ];
 
