@@ -1,5 +1,4 @@
-﻿using RespectCounter.Domain.Interfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace RespectCounter.Domain.Model
 {
