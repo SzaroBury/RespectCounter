@@ -3,13 +3,6 @@
     grid-column-end: 3;
 }
 
-.activity{
-    display: grid; 
-    grid-template-rows: auto 3em;
-    grid-template-columns: 15em auto;
-    column-gap: 15px;
-}
-
 .imageContainer {
     text-align: center; /* Wyśrodkowuje obrazek i podpis */
     margin: 0 auto; /* Wyśrodkowuje cały kontener */

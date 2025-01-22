@@ -1,156 +1,101 @@
-import React from 'react';
-import SortMenu from '../../components/SortMenu/SortMenu';
 import './ActivitiesPage.css';
-import TagsMenu from '../../components/TagsMenu/TagsMenu';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import SortMenu from '../../components/SortMenu/SortMenu';
+import TagsMenu from '../../components/TagsMenu/TagsMenu';
+import Activity from './Activity/Activity';
+import Loading from '../../components/Loading/Loading';
+import { useAuth } from '../../utils/AuthProvider/AuthProvider';
 
-class ActivitiesPage extends React.Component {
-    static displayName = "RespectCounter - Events";
+function ActivitiesPage(props) {
+    const [loading, setLoading] = useState(true);
+    const [title, setTitle] = useState("Activities - Latest added");
+    const [sortOption, setSortOption] = useState("la");
+    const [onlyVerifiedOption, setOnlyVerifiedOption] = useState(true);
+    const [tagsSelected, setTagsSelected] = useState([]);
+    const [activities, setActivities] = useState([]);
+    const navigate = useNavigate();
+    const { isLoggedIn, openLoginPopup } = useAuth();
+
+    useEffect(() => {
+        setLoading(true);
+        loadActivities();
+    }, [sortOption, onlyVerifiedOption]);
+
+    useEffect(() => {
+        setLoading(true);
+        loadActivities();
+    }, [tagsSelected]);
+
+    const handleSortChange = (sortOptionName, sortOptionDiplay) => {
+        console.log("ActivitiesPage: handleSortChange(" + sortOptionName + ", " + sortOptionDiplay + ")")
+        setTitle("Activities - " + sortOptionDiplay);
+        setSortOption(sortOptionName);
+    };
     
-    constructor(props) {
-        super(props);
-        this.state = { 
-            loading: true,
-            first: true,
-            title: "Events - Latest added",
-            sortOption: "la",
-            scopeOption: true,
-            activities: [],
+    const handleScopeChange = () => {
+        console.log("ActivitiesPage: handleScopeChange()");
+        setOnlyVerifiedOption(!onlyVerifiedOption);
+    };
+
+    const handleCreateButton = () => {
+        if(isLoggedIn) {
+            navigate("/activity/create");
+        } else {
+            openLoginPopup()
         };
+    };
 
-        this.handleSortChange = (sortOptionName, sortOptionDiplay) => {
-            console.log("ActivitiesPage: handleSortChange(" + sortOptionName + ", " + sortOptionDiplay + ")")
-            // const targetName = sortOptionName;
-            this.setState({ 
-                title: "Events - " + sortOptionDiplay,
-                sortOption: sortOptionName,
-            });
-            console.log("   targetName: " + sortOptionName)
-            this.loadActivities(sortOptionName, this.state.scopeOption);
-        };
-        
-        this.handleScopeChange = () => {
-            console.log("ActivitiesPage: handleScopeChange()");
-            const targetValue = !this.state.scopeOption;
-            this.setState({ scopeOption: targetValue });
-            this.loadActivities(this.state.sortOption, targetValue);
-        };
-
-        this.handleTagSelected = () => {
-            console.log("ActivitiesPage: handleTagSelected()");
-            this.setState({
-                title: "Events - Latest added",
-                sortOption: "la",
-                scopeOption: true,
-            });
-
-            this.loadActivities("la", false);
-        };
-    }
-
-    componentDidMount() {
-        console.log("ActivitiesPage: componentDidMount()")
-        this.loadActivities("la", this.state.scopeOption);
-    }
-
-    render() {
-        return (
-            <>
-                <SortMenu page="Activities" onSortOptionChange={this.handleSortChange} onScopeChange={this.handleScopeChange}/>
-                <div className='act-list'>
-                    <h2>{this.state.title}</h2>
-                    <ActivityList list={this.state.activities}/>
-                </div>
-                <TagsMenu onTagSelected={this.handleTagSelected}/>
-            </>
-        );
-    }
-
-    loadActivities(sortOption, onlyVerified) {
-        console.log("ActivitiesPage: loadActivities(" + sortOption + ", " + onlyVerified + ")");
-        this.setState({ activities: [] });
+    const loadActivities = () => {
+        console.log("ActivitiesPage: loadActivities()");
+        setActivities([]);
     
-        const targetUrl = onlyVerified ? "activities" : "activities/all";
+        const targetUrl = onlyVerifiedOption ? "activities" : "activities/all";
+        let requestParams;
+        if( tagsSelected.length === 0) {
+            requestParams = { params: { order: sortOption }}
+        } else {
+            requestParams = { params: { order: sortOption, tags: tagsSelected.map(ts => ts.name).join(",") }};
+        };
     
-        axios.get(`/api/${targetUrl}`, {
-            params: {
-                order: sortOption
-            }
-        })
+        axios.get(`/api/${targetUrl}`, requestParams)
         .then(response => {
-            // Automatyczne parsowanie JSON w Axios
-            this.setState({ activities: response.data });
+            setActivities(response.data);
+            setLoading(false);
         })
         .catch(error => {
+            setLoading(false);
+
             if (error.response) {
-                // Błąd odpowiedzi HTTP (np. 404, 500)
                 console.error(`HTTP error! Status: ${error.response.status}`);
             } else if (error.request) {
-                // Żądanie zostało wysłane, ale brak odpowiedzi
                 console.error("No response received: ", error.request);
             } else {
-                // Inne błędy
                 console.error("Error setting up the request: ", error.message);
             }
         });
     }
-}
 
-function ActivityList({list}) {   
     return (
-        list.map((act) => 
-            <div key={"activity_" + act.id} className='activity m-3 p-3 border'>
-                <div className='person'>
-                    <div className='imageContainer'>
-                        <img className='image' src={act.personImagePath} alt={act.author}/>
-                        <p className='caption'><b>{act.personName}</b></p>
-                    </div>
-                    <span className='personRate'>
-                        <span className='form-control text-center'>{act.personRespect}</span>
-                    </span>
-                </div>
-                <div className='contentContainer'>
-                    <p>{act.value}</p>
-                    <span className='source'>Source: {act.source}</span>
-                </div>
-                
-                <div className='buttons'>
-                    <div></div>
-                    <div className='input-group'>
-                        <button className='btn btn-secondary'>
-                            <i className="bi bi-hand-thumbs-down-fill"></i>
-                            <i className="bi bi-hand-thumbs-down-fill"></i>
-                        </button>
-                        <button className='btn btn-secondary'>
-                            <i className="bi bi-hand-thumbs-down-fill"></i>
-                        </button>
-                        <span className='rating form-control text-center'>
-                            {act.respect}
-                        </span>
-                        <button className='btn btn-secondary'>                                
-                            <i className="bi bi-hand-thumbs-up-fill"></i>
-                        </button>
-                        <button className='btn btn-secondary'>
-                            <i className="bi bi-hand-thumbs-up-fill"></i>
-                            <i className="bi bi-hand-thumbs-up-fill"></i>
-                        </button>
-                    </div>
-                    <div>
-
-                    </div>
-                    <button className='btn btn-secondary p-2'>
-                        <span>
-                            {act.comments} Comments
-                        </span>
-                        <i className="bi bi-chat-left m-2"></i>
+        <>
+            <TagsMenu countMode="countActivities" tagsSelected={tagsSelected} setTagsSelected={setTagsSelected}/>
+            <div className='act-list'>
+                <div className='text-end'>
+                    <button className='btn btn-outline-primary' title="Post a public activity" onClick={handleCreateButton}>
+                        <span className='me-2'>Post a public activity</span>
+                        <i className="bi bi-file-earmark-plus-fill"></i>
                     </button>
                 </div>
+                <h2>{title}</h2>
+                <Loading loading={loading}/>
+                {activities.map((act) => 
+                    <Activity key={"Act_" + act.id} a={act}/>
+                )}
             </div>
-        )
-    )
+            <SortMenu page="Activities" onSortOptionChange={handleSortChange} onScopeChange={handleScopeChange}/>
+        </>
+    );
 }
 
-
-
 export default ActivitiesPage;
-
