@@ -1,0 +1,14 @@
+.comment-container {    
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.comment-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 1rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; 
+}
