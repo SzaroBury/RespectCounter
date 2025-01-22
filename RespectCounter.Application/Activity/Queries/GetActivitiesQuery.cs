@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetActivitesQuery(string Search, string Order, string Tag, List<ActivityStatus>? Status = null) : IRequest<List<ActivityDTO>>;
+    public record GetActivitesQuery(string Search, string Order, string Tags, List<ActivityStatus>? Status = null) : IRequest<List<ActivityDTO>>;
 
     public class GetActivitesQueryHandler : IRequestHandler<GetActivitesQuery, List<ActivityDTO>>
     {
@@ -22,32 +22,35 @@ namespace RespectCounter.Application.Queries
             var status = request.Status == null || !request.Status.Any() ? [ActivityStatus.Verified, ActivityStatus.NotVerified] : request.Status!;
             IQueryable<Activity> activities = uow.Repository().FindQueryable<Activity>(
                 a => status.Contains(a.Status)
-            ).Include("Person").Include("Comments.Children").Include("Reactions").Include("Tags").Include("CreatedBy");
+            ).Include(a => a.Person)
+            .Include(a => a.Comments).ThenInclude(c => c.Children)
+            .Include(a => a.Reactions)
+            .Include(a => a.Tags)
+            .Include(a => a.CreatedBy);
 
             if(!string.IsNullOrEmpty(request.Search))
             {
                 var search = request.Search.ToLower();
-                activities = activities.Where(a => a.Value.ToLower().Contains(search)
-                            || a.Source.ToLower().Contains(search)
-                            || a.Description.ToLower().Contains(search)
-                            || a.Tags.Any(t => t.Name.ToLower().Contains(search))
-                        );
+                activities = activities.Where(a =>
+                    (a.Value != null && a.Value.ToLower().Contains(search)) ||
+                    (a.Source != null && a.Source.ToLower().Contains(search)) ||
+                    (a.Description != null && a.Description.ToLower().Contains(search)) ||
+                    a.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(search))
+                );
             }
 
-            if(!string.IsNullOrEmpty(request.Tag))
+            IEnumerable<Activity> result = await activities.ToListAsync(cancellationToken);
+            
+            if(!string.IsNullOrEmpty(request.Tags))
             {
-                var tag = request.Tag.ToLower();
-                activities = activities.Where(a => a.Tags.Any(t => t.Name.ToLower() == tag)
-                            || a.Person.Tags.Any(pt => pt.Name.ToLower() == tag)
-                        );
+                var tags = request.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim().ToLower());
+                result = result.Where(a => tags.All(tag => a.Tags.Any(at => at.Name.ToLower() == tag)));
             }
             
-            var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;        
-            var ordered = await RespectService.OrderActivitiesAsync(activities, order);
-            var result = ordered.Select(
-                a => a.ToActivityDTO()
-            );
-            return result.ToList();
+            var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;  
+            var orderedResult = RespectService.OrderActivities(result, order);
+
+            return orderedResult.Select(a => a.ToDTO()).ToList();
         }
     }
 }
