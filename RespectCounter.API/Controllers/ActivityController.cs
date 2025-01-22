@@ -95,17 +95,32 @@ public class ActivityController: ControllerBase
     public async Task<IActionResult> ProposeActivity([FromBody] ProposeActivityModel newActivity)
     {
         var command = new AddActivityCommand(
-            newActivity.Persons, 
-            newActivity.Value, 
-            newActivity.Description, 
-            newActivity.Location, 
-            newActivity.Happend, 
+            newActivity.PersonId, 
+            newActivity.Title, 
+            newActivity.Description ?? "", 
+            newActivity.Location ?? "", 
+            newActivity.Happend ?? "", 
             newActivity.Source, 
             newActivity.Type, 
-            newActivity.Tags);
-        Activity result = await mediator.Send(command);
+            newActivity.Tags,
+            User
+            );
+
+        try
+        {
+            var result = await mediator.Send(command);
 
         return Ok(result);
+        }   
+        catch(ArgumentException e)
+        {
+            ModelState.AddModelError(e.ParamName ?? "??", e.Message);
+            return ValidationProblem(ModelState);
+        } 
+        catch(SecurityException)
+        {
+            return Unauthorized();
+        }
     }
 
     [HttpPut("{id}/verify")]
