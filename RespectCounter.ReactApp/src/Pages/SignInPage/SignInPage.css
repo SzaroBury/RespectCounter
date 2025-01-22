@@ -5,10 +5,11 @@
     grid-template-rows: 1fr 3fr
 }
 
-.signin h2 {
+.signin-header {
     grid-column: 2;
+    margin-top: 2rem;
 }
 
-.signin form {
+.signin-form {
     grid-column: 2;
 }
