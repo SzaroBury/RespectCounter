@@ -8,24 +8,6 @@ using RespectCounter.Domain.Model;
 
 namespace RespectCounter.API.Controllers;
 
-//Get Persons by
-//  Search: Tags, Firstname, Lastname, Birth date, Nationality, Respect, Verified/NotVerified
-//      Sorting: Best Match, Most Respect, Least Respect, Trending (last 7d reactions and respect), Alfpha
-//  Activity Id
-//  ?IdentityUserUid
-//  Pages/Autoload more?
-//Get Person by Id
-
-//Post a person
-//Verify a person
-//React
-//Comment
-//Add a tag
-//Propose a change
-//?Hide a person/Mark as invalid
-
-//other todos: auto added tag based on nationality
-
 [ApiController]
 [Route("api/person")]
 public class PersonController: ControllerBase

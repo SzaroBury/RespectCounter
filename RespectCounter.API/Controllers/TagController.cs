@@ -5,20 +5,6 @@ using RespectCounter.Domain.Model;
 
 namespace RespectCounter.API.Controllers;
 
-//Get Tags By
-// PersonId
-// ActivityId
-// Level
-// ?IdentityUserUid
-// Pages/Autoload more?
-//Get Tags By Id
-
-//Post a tag
-//?Edit a tag
-//?Hide a comment/Mark as 
-
-//other todos: auto added tag based on nationality
-
 [ApiController]
 [Route("api/tag")]
 public class TagController: ControllerBase
