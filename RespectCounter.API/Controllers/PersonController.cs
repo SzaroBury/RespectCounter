@@ -1,3 +1,4 @@
+using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,6 +62,47 @@ public class PersonController: ControllerBase
         }
     }
 
+    [HttpGet("{id}/comments")]
+    public async Task<IActionResult> GetComments(string id, [FromQuery] int level = 2)
+    {
+        var query = new GetCommentsForPersonQuery(id, level);
+
+        try
+        {
+            var result = await mediator.Send(query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
+    [HttpGet("/api/persons/names")]
+    public async Task<IActionResult> GetSimplePersons([FromQuery] string search = "", [FromQuery] string order = "")
+    {
+        var query = new GetSimplePersonsQuery();
+        var result = await mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/tags")]
+    public async Task<IActionResult> GetPersonTags(string id)
+    {
+        var query = new GetPersonTagsQuery(id);
+
+        try
+        {
+            var result = await mediator.Send(query);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
     #endregion
 
     #region Commands
@@ -69,16 +111,31 @@ public class PersonController: ControllerBase
     {
         var command = new AddPersonCommand(
             newPerson.FirstName, 
-            newPerson.LastName, 
-            newPerson.Description, 
+            newPerson.LastName,
+            newPerson.NickName ?? "",
+            newPerson.Description ?? "", 
             newPerson.Nationality, 
             newPerson.Birthday, 
             newPerson.DeathDate, 
-            newPerson.Tags
+            newPerson.Tags,
+            User
         );
-        Person result = await mediator.Send(command);
 
-        return Ok(result);
+        try
+        {
+            var result = await mediator.Send(command);
+
+            return Ok(result);
+        }   
+        catch(ArgumentException e)
+        {
+            ModelState.AddModelError(e.ParamName ?? "??", e.Message);
+            return ValidationProblem(ModelState);
+        } 
+        catch(SecurityException)
+        {
+            return Unauthorized();
+        }
     }
 
     [HttpPut("{id}/verify")]
