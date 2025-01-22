@@ -30,14 +30,14 @@ namespace RespectCounter.Application.Commands
             Activity? targetActivity = await uow.Repository().GetById<Activity>(activityId);
             if(targetActivity == null) throw new KeyNotFoundException("There is no person object with the given id value.");
 
-            Reaction? reaction = uow.Repository().FindQueryable<Reaction>(r => r.PersonId == activityId && r.CreatedById == user.Id).FirstOrDefault();
-            if(reaction != null) throw new InvalidOperationException("This user has already reacted to this person.");
+            Reaction? reaction = uow.Repository().FindQueryable<Reaction>(r => r.ActivityId == activityId && r.CreatedById == user.Id).FirstOrDefault();
+            if(reaction != null) throw new InvalidOperationException("This user has already reacted to this activity.");
 
             if(!Enum.IsDefined(typeof(ReactionType), request.ReactionType)) throw new ArgumentException("Invalid format of the reaction type.");
 
             reaction = new Reaction 
             {
-                PersonId = activityId,
+                ActivityId = activityId,
                 ReactionType = (ReactionType) request.ReactionType,
                 
                 Created = now,
