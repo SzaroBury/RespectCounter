@@ -3,8 +3,8 @@ namespace RespectCounter.Application.DTOs;
 public record ActivityDTO(
     string Id,
     string PersonId,
-    string PersonName,
-    string PersonRespect,
+    string PersonFullName,
+    int PersonRespect,
     string PersonImagePath,
     string CreatedBy,
     string CreatedById,
