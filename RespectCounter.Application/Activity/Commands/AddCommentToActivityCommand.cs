@@ -28,7 +28,7 @@ namespace RespectCounter.Application.Commands
             if(!Guid.TryParse(request.ActivityId, out activityId))  throw new ArgumentException("Invalid id format.");
 
             Activity? targetActivity = await uow.Repository().GetById<Activity>(activityId);
-            if(targetActivity == null) throw new KeyNotFoundException("There is no person object with the given id value.");
+            if(targetActivity == null) throw new KeyNotFoundException("There is no activity object with the given id value.");
 
             Comment comment = new Comment 
             {
