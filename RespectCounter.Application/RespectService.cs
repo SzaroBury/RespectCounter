@@ -84,52 +84,44 @@ public static class RespectService
         return ordered;
     }
 
-    public static async Task<List<Activity>> OrderActivitiesAsync(IQueryable<Activity> posts, string order)
+    public static IEnumerable<Activity> OrderActivities(IEnumerable<Activity> posts, string order)
     {
         int trendingDays = 7;
-        List<Activity> ordered = new();
         if(string.IsNullOrEmpty(order)) order = "la";
         switch(order)
         {
             case "bm":
                 throw new NotImplementedException();
             case "mr":
-                ordered = await posts.Include("Reactions").ToListAsync();
-                ordered = ordered.Select(a => new Tuple<Activity, int>(a, CountRespect(a.Reactions)))
-                                    .OrderByDescending(t => t.Item2)
-                                    .Select(t => t.Item1)
-                                    .ToList();
-                break;
+                return posts.Select(a => new 
+                        {
+                            Activity = a,
+                            RespectCount = CountRespect(a.Reactions)
+                        })
+                        .OrderByDescending(a => a.RespectCount)
+                        .Select(a => a.Activity);
             case "lr":
-                ordered = await posts.Include("Reactions").ToListAsync();
-                ordered = ordered.Select(a => new Tuple<Activity, int>(a, CountRespect(a.Reactions)))
-                                    .OrderBy(t => t.Item2)
-                                    .Select(t => t.Item1)
-                                    .ToList();   
-                break;
+                return posts.Select(a => new 
+                    {
+                        Activity = a,
+                        RespectCount = CountRespect(a.Reactions)
+                    })
+                    .OrderBy(a => a.RespectCount)
+                    .Select(a => a.Activity);
             case "la":
-                ordered = await posts.OrderByDescending(a => a.Created).ToListAsync();               
-                break;
+                return posts.OrderByDescending(a => a.Created);               
             case "lh":
-                ordered = await posts.OrderByDescending(a => a.Happend).ToListAsync();               
-                break;
+                return posts.OrderByDescending(a => a.Happend);               
             case "tr":
-                ordered = await posts.Include("Reactions").ToListAsync();
-                ordered = posts.Select(a => new Tuple<Activity, int>
-                (
-                    a, 
-                    CountRespect
-                    (
-                        a.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-trendingDays)).ToList()
-                    )
-                )).ToList()
-                .OrderBy(t => t.Item2)
-                .Select(t => t.Item1)
-                .ToList();
-                
-                break;
+                return posts.Select(a => new 
+                    {
+                        Activity = a,
+                        RecentRespectCount = CountRespect(a.Reactions.Where(r => r.Created > DateTime.Now.AddDays(-trendingDays)).ToList())
+                    })
+                    .OrderByDescending(t => t.RecentRespectCount)
+                    .Select(t => t.Activity);
+            default: 
+                return posts.OrderByDescending(a => a.Created); 
         }
-
-        return ordered;
     }   
 }
