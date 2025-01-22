@@ -4,6 +4,7 @@ using RespectCounter.Application.Queries;
 using RespectCounter.Application.Commands;
 using RespectCounter.Domain.Model;
 using RespectCounter.API.Models;
+using System.Security;
 
 namespace RespectCounter.API.Controllers;
 
@@ -22,27 +23,29 @@ public class ActivityController: ControllerBase
 
     #region Queries
     [HttpGet("/api/activities/all")]
-    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tag = "")
+    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
     {
-        var query = new GetActivitesQuery(search, order, tag);
+        Console.WriteLine($"GetActivities(search = '{search}', order = '{order}', tags = '{tags}')");
+        var query = new GetActivitesQuery(search, order, tags);
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
     [HttpGet("/api/activities")]
-    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tag = "")
+    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
     {
-        var query = new GetActivitesQuery(search, order, tag, [ActivityStatus.Verified]);
+        Console.WriteLine($"GetVerifiedActivities(search = '{search}', order = '{order}', tags = '{tags}')");
+        var query = new GetActivitesQuery(search, order, tags, [ActivityStatus.Verified]);
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
-    [HttpGet("{id}/comments")]
-    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetActivity(string id)
     {
-        var query = new GetCommentsForActivityQuery(id, level);
+        var query = new GetActivityByIdQuery(id);
 
         try
         {
@@ -55,10 +58,10 @@ public class ActivityController: ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetActivity(string id)
+    [HttpGet("{id}/comments")]
+    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2)
     {
-        var query = new GetActivityByIdQuery(id);
+        var query = new GetCommentsForActivityQuery(id, level);
 
         try
         {
@@ -92,7 +95,7 @@ public class ActivityController: ControllerBase
         {
             var result = await mediator.Send(command);
 
-        return Ok(result);
+            return Ok(result);
         }   
         catch(ArgumentException e)
         {
@@ -127,9 +130,18 @@ public class ActivityController: ControllerBase
     public async Task<IActionResult> CommentActivity(string id, [FromBody] string content)
     {
         var command = new AddCommentToActivityCommand(id, content, User);
-        Activity result = await mediator.Send(command);
 
-        return Ok(result);;
+        try
+        {
+            Activity result = await mediator.Send(command);
+            
+            return Ok(result);
+        }
+        catch(SecurityException)
+        {
+            return Unauthorized();
+        }
+
     }
 
     [HttpPost("{id}/tag/{tag}")]
