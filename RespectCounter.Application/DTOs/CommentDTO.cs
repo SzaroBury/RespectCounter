@@ -4,6 +4,7 @@ public record CommentDTO(
     string Id, 
     string CreatedBy,
     string CreatedById,
+    string Created,
     string Content, 
     string ActivityId,
     string PersonId,
@@ -11,4 +12,5 @@ public record CommentDTO(
     int Status,
     int Respect,
     int ChildrenCount,
-    List<CommentDTO> Children);
+    List<CommentDTO> Children
+);
