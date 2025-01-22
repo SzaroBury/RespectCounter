@@ -1,26 +1,14 @@
 ﻿using MediatR;
-using System.Net;
-using RespectCounter.Infrastructure;
 using RespectCounter.Infrastructure.Repositories;
 using RespectCounter.Domain.Model;
+using RespectCounter.Application.DTOs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetPersonsQuery : IRequest<List<Person>>
-    {
-        public string Search { get; set; } = "";
-        public string Order { get; set; } = "";
+    public record GetPersonsQuery(string Search = "", string Order = "la") : IRequest<List<PersonDTO>>;
 
-        public GetPersonsQuery(string search, string order)
-        {
-            Search = search;
-            Order = string.IsNullOrEmpty(order) ? "la" : order;
-        }
-    }
-
-    public class GetPersonsQueryHandler : IRequestHandler<GetPersonsQuery, List<Person>>
+    public class GetPersonsQueryHandler : IRequestHandler<GetPersonsQuery, List<PersonDTO>>
     {
         private readonly IUnitOfWork uow;
 
@@ -29,7 +17,7 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<List<Person>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        public async Task<List<PersonDTO>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<Person> persons;
             if(string.IsNullOrEmpty(request.Search))
@@ -50,7 +38,10 @@ namespace RespectCounter.Application.Queries
                 );
             }
             
-            return await RespectService.OrderPersonsAsync(persons, request.Order);
+            var included = persons.Include(p => p.Tags).Include(p => p.Reactions).Include(p => p.CreatedBy);
+            
+            var ordered = await RespectService.OrderPersonsAsync(included, request.Order);
+            return ordered.Select(p => p.ToDTO()).ToList();
         }
     }
 }
