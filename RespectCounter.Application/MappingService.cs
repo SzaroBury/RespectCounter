@@ -5,22 +5,22 @@ namespace RespectCounter.Application;
 
 public static class MappingService
 {
-    public static ActivityDTO ToActivityDTO(this Activity a)
+    public static ActivityDTO ToDTO(this Activity a)
     {
         return new ActivityDTO(
             a.Id.ToString(),
-            a.Person.Id.ToString(),
-            a.Person.FirstName + " " + a.Person.LastName,
-            RespectService.CountRespect(a.Person.Reactions).ToString(),
-            "/persons/person_" + a.Person.LastName.ToLower() + ".jpg",
+            a.Person?.Id.ToString() ?? "??",
+            $"{a.Person?.FirstName ?? "?"} {a.Person?.LastName ?? "?"}",
+            RespectService.CountRespect(a.Person?.Reactions ?? []),
+            $"person_{a.Person?.LastName}.jpg",
             a.CreatedBy?.UserName ?? "??",
             a.CreatedById,
             a.Value,
             a.Description,
             a.Location,
             a.Source,
-            string.Join(",", a.Tags),
-            a.Happend.ToLongDateString(),
+            string.Join(",", a.Tags.Select(t => t.Name)),
+            a.Happend?.ToLongDateString() ?? "",
             a.Comments.Count + a.Comments.Sum(c => c.ChildrenCount),
             (int)a.Type,
             RespectService.CountRespect(a.Reactions)
