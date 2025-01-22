@@ -1,23 +1,15 @@
 ﻿using MediatR;
-using System.Net;
-using RespectCounter.Infrastructure;
 using RespectCounter.Infrastructure.Repositories;
 using RespectCounter.Domain.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Xml;
+using RespectCounter.Application.DTOs;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetVerifiedPersonsQuery : IRequest<IEnumerable<Person>>
-    {
-        public string Search { get; set; } = "";
-        public string Order { get; set; } = ""; //bm - Best Match; mr - Most Respected; lr - Least Respected, la, - Latest, tr - Trending (last 7d reactions and respect), aZ - Alfphabetical
-    }
+    public record GetVerifiedPersonsQuery(string Search = "", string Order = "") : IRequest<IEnumerable<PersonDTO>>;
 
     // to do: to find better solution for searching terms (contains is like "LIKE '%searchterm%'", so it is not an optimal solution)
-    // to do: implement BestMatch 
-    public class GetVerifiedPersonsQueryHandler : IRequestHandler<GetVerifiedPersonsQuery, IEnumerable<Person>>
+    public class GetVerifiedPersonsQueryHandler : IRequestHandler<GetVerifiedPersonsQuery, IEnumerable<PersonDTO>>
     {
         private readonly IUnitOfWork uow;
 
@@ -26,7 +18,7 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<IEnumerable<Person>> Handle(GetVerifiedPersonsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<PersonDTO>> Handle(GetVerifiedPersonsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<Person> persons;
             if(string.IsNullOrEmpty(request.Search))
@@ -47,7 +39,10 @@ namespace RespectCounter.Application.Queries
                 );
             }
             
-            return await RespectService.OrderPersonsAsync(persons, request.Order);
+            var included = persons.Include(p => p.Tags).Include(p => p.Reactions).Include(p => p.CreatedBy);
+            
+            var ordered = await RespectService.OrderPersonsAsync(included, request.Order);
+            return ordered.Select(p => p.ToDTO()).ToList();
         }
     }
 }
