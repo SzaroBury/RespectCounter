@@ -1,5 +1,6 @@
 import React from 'react';
 import "./HomePage.css";
+import { Link } from 'react-router-dom';
 
 
 class HomePage extends React.Component {
@@ -15,15 +16,15 @@ class HomePage extends React.Component {
             <>
                 <div className='home-page'>
                     <h1 className="text-center">Welcome To Respect Counter</h1>
-                    <p className="text-center">See what it is <a href="/about">about</a>.</p>
+                    <p className="text-center">See what it is <Link to="/about">about</Link>.</p>
 
-                    <h2>Trending Events</h2>
-                    <a href="/events">See more</a>
+                    <h2>Trending Activities</h2>
+                    <Link to="/activities">See more</Link>
 
                     <br/>
                     
-                    <h2>Trending Persons</h2>
-                    <a href='/persons'>See more</a>
+                    <h2 className='mt-5'>Best Persons</h2>
+                    <Link href='/persons'>See more</Link>
 
                 </div>
             </>
