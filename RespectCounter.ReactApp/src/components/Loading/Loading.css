@@ -1,0 +1,15 @@
+/* .spinner-grow {
+    animation: spinner-grow 1s infinite;
+} */
+
+.spinner-1 {
+    animation-delay: 0s !important;
+}
+
+.spinner-2 {
+    animation-delay: 0.2s !important;
+}
+
+.spinner-3 {
+    animation-delay: 0.4s !important;
+}
