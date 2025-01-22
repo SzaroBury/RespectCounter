@@ -14,9 +14,22 @@ class AboutPage extends React.Component {
         return (
             <Container className="about-page">
                 <h1 className="text-center">Welcome To Respect Counter</h1>
-                <p className="m-5 text-justify">&#9;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque rhoncus eros et nibh tristique, ac cursus libero sagittis. Morbi iaculis sapien luctus lectus viverra hendrerit. Sed fermentum viverra mauris eu ullamcorper. Quisque vestibulum massa eros, ac interdum lectus tristique vel. Sed sem est, condimentum eget scelerisque vitae, aliquam nec sem. Aliquam finibus iaculis dignissim. Suspendisse sagittis ligula at viverra cursus. Etiam molestie, dui nec feugiat porttitor, ipsum libero accumsan justo, id dictum ipsum ligula ut mauris. Praesent lacus libero, cursus dignissim cursus porta, volutpat sit amet odio. Nam interdum bibendum dolor nec facilisis. Morbi ut tortor sed massa elementum semper non ultrices ante. Duis faucibus nunc at sapien maximus vestibulum</p>
+                <p className="m-5 text-center">.NET + React application that allows users to express their opinion on various public figures, their quotes and actions.</p>
 
-                <p>To-do list: </p>
+                <div>
+                    <h5>Target main functionalities:</h5>
+                    <ul>
+                        <li>Users can propose public figures.</li>
+                        <li>Users can add quotes/activities and link them to stored public figures.</li>
+                        <li>Users can comment and react to persons, activities and other comments.</li>
+                        <li>Users can search quotes, activities and persons by tags.</li>
+                        <li>Users can report activities, comments.</li>
+                        <li>Moderators can verify public figures, quotes and activities added by users.</li>
+                        <li>Moderators can create verified public figures, quotes and activities.</li>
+                        <li>Moderators can hide comments and activities.</li>
+                    </ul>
+                </div>
+                <h5>To-do list: </h5>
                     <ul>
                         <li>User:
                             <ul>
