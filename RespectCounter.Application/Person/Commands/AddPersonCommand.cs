@@ -1,4 +1,9 @@
+using System.Globalization;
+using System.Security;
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 using RespectCounter.Infrastructure.Repositories;
 
@@ -7,14 +12,16 @@ namespace RespectCounter.Application.Commands;
 public record AddPersonCommand(
     string FirstName, 
     string LastName, 
+    string NickName,
     string Description, 
     string Nationality, 
-    string Birthday, 
+    string? Birthday, 
     string? DeathDate, 
-    string Tags
-) : IRequest<Person>;
+    string Tags,
+    ClaimsPrincipal User
+) : IRequest<PersonDTO>;
 
-public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
+public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, PersonDTO>
 {
     private readonly IUnitOfWork uow;
 
@@ -23,24 +30,32 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
         this.uow = uow;
     }
 
-    public async Task<Person> Handle(AddPersonCommand request, CancellationToken cancellationToken)
+    public async Task<PersonDTO> Handle(AddPersonCommand request, CancellationToken cancellationToken)
     {
         DateTime now = DateTime.Now;
         Guid newId = Guid.NewGuid();
+        DateOnly? birthday = null;
         DateOnly? deathDate = null;
-        
-        if(!DateOnly.TryParse(request.Birthday, out DateOnly birthday))
+
+        IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
+        if(user == null) throw new SecurityException("Authentication issue. No user found.");
+
+        if(!string.IsNullOrEmpty(request.Birthday))
         {
-            throw new ArgumentException("Invalid birthday format.");
+            if(!DateOnly.TryParseExact(request.Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly parsedDate))
+            {
+                throw new ArgumentException("Invalid date format. Expected format: yyyy-MM-dd", "Birthday");
+            }
+            birthday = parsedDate;
         }
 
         if(!string.IsNullOrEmpty(request.DeathDate))
         {
-            if(!DateOnly.TryParse(request.DeathDate, out DateOnly result))
+            if(!DateOnly.TryParseExact(request.DeathDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly parsedDate))
             {
-                throw new ArgumentException("Invalid deathDate format.");
+                throw new ArgumentException("Invalid date format. Expected format: yyyy-MM-dd", "DeathDate");
             }
-            deathDate = result;
+            deathDate = parsedDate;
         }
 
         Person? newPerson = new Person
@@ -48,6 +63,7 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
             Id = newId,
             FirstName = request.FirstName,
             LastName = request.LastName,
+            NickName = request.NickName,
             Description = request.Description,
             Nationality = request.Nationality,
             Birthday = birthday,
@@ -55,9 +71,9 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
 
             Status = PersonStatus.NotVerified,
             Created = now,
-            CreatedById = "sys",
+            CreatedById = user.Id,
             LastUpdated = now,
-            LastUpdatedById = "sys"
+            LastUpdatedById = user.Id
         };
 
         List<string> tags = request.Tags.Split(",").ToList();
@@ -81,12 +97,10 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, Person>
             }
             newPerson.Tags.Add(existingTag);
         }
-        uow.Repository().Add(newPerson);
+        var result = uow.Repository().Add(newPerson);
         await uow.CommitAsync(cancellationToken);
 
-        newPerson = await uow.Repository().SingleOrDefaultAsync<Person>(p => p.Id == newId, "");
-
-        if(newPerson != null)   return newPerson;
+        if(newPerson != null) return result.ToDTO();
         else throw new Exception("Unknown error during saving.");
     }
 }
