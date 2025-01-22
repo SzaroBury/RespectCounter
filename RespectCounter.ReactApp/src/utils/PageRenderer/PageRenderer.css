@@ -1,8 +1,10 @@
 .page {
     display: grid;
-    grid-template-columns: 15em auto 15em;
-    grid-column: span 3;
+    grid-template-columns: 20em auto 20em;
+    padding-top: 2em;
     gap: 3em;
-    margin: 3em;
-    margin-top: 5em;
+    height: calc(100vh - var(--rc-header-height));
+    margin-top: var(--rc-header-height);
+    overflow: auto;
+    scrollbar-gutter: stable;
 }
