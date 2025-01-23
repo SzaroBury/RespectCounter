@@ -63,12 +63,25 @@ function Comment({comment, onReplyAdded}) {
                         <i className="bi bi-reply-fill me-2"></i>Reply
                     </button>
                     <div className="reaction-buttons-container">
-                        <ReactionButtons respect={comment.respect} targetParentId={comment.id}/>
+                        <ReactionButtons 
+                            respect={comment.respect} 
+                            targetParentId={comment.id}
+                        />
                     </div>
                 </div>
             </div>
-            { showReplyForm && <ReplyForm commentId={comment.id} onCancel={() => setShowReplyForm(false)} onReplyAdded={handleReplyAdded}/> }
-            <Replies replies={comment.children} count={comment.childrenCount} />
+            { 
+                showReplyForm && 
+                <ReplyForm 
+                    commentId={comment.id} 
+                    onCancel={() => setShowReplyForm(false)} 
+                    onReplyAdded={handleReplyAdded}
+                /> 
+            }
+            <Replies 
+                replies={comment.children} 
+                count={comment.childrenCount} 
+            />
         </>
     );
 }
@@ -132,7 +145,10 @@ function Replies({replies, count}) {
                     </span>
                     {replies.map(reply => 
                         <div className='comment-child'>
-                            <Comment key={"Comment_" + reply.id} comment={reply} />
+                            <Comment 
+                                key={"Comment_" + reply.id} 
+                                comment={reply} 
+                            />
                         </div>
                     )}
                 </div>
