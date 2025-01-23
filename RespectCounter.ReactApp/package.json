@@ -1,5 +1,5 @@
 {
-  "name": "reactapp",
+  "name": "respect-counter-react-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,6 +16,12 @@
     "react-router-dom": "^6.14.1",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
+  },
+  "overrides": {
+    "nth-check": "^2.1.1",
+    "nanoid": ">=3.3.8",
+    "path-to-regexp": ">=0.1.12",
+    "postcss": ">=8.4.31"
   },
   "scripts": {
     "start": "set HTTPS=true&&react-scripts start",
