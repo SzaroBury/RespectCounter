@@ -140,7 +140,7 @@ function Replies({replies, count}) {
             showReplies ? (
                 <div className='mt-2'>
                     <span onClick={() => {setShowReplies(false)}}>
-                        <i class="bi bi-caret-up-fill"></i>
+                        <i className="bi bi-caret-up-fill me-2"></i>
                         Hide replies
                     </span>
                     {replies.map(reply => 
@@ -158,7 +158,7 @@ function Replies({replies, count}) {
                         count > 0 &&
                         <div className='mt-2'>
                             <span onClick={() => { setShowReplies(true) }}>
-                                <i class="bi bi-caret-down-fill"></i>
+                                <i className="bi bi-caret-down-fill me-2"></i>
                                 {count === 1 ? "Show reply" : `Show ${count} replies`}
                             </span> 
                         </div>
