@@ -81,9 +81,9 @@ function LoginPopup() {
                     </div>
                 </form>
                 <div className="popup-signin">
-                    <Link className="me-2" onClick={handleSignInClick}>
+                    <button className="btn me-2" onClick={handleSignInClick}>
                         Sign in
-                    </Link>
+                    </button>
                     <label className="popup-signin-label">if you don't have an account yet.</label>
                 </div>
                 
