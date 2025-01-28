@@ -1,23 +1,25 @@
-# RespectCounter (work in progress)
+# **RespectCounter (Work in Progress)**
 
-.NET + React application that allows users to express their opinion on various public figures, their quotes and actions.
+**RespectCounter** is a .NET + React application that allows users to express their opinion on various public figures, their quotes and actions.
 
-## Target main functionalities:
-- Users can propose public figures.
-- Users can add quotes/activities and link them to stored public figures.
-- Users can comment and react to persons, activities and other comments.
-- Users can search quotes, activities and persons by tags.
-- Users can report activities, comments.
-- Moderators can verify public figures, quotes and activities added by users.
-- Moderators can create verified public figures, quotes and activities.
-- Moderators can hide comments and activities.
+---
 
-## Installation
-- Clone repository: `git clone https://github.com/SzaroBury/RespectCounter.git`
-- Start the API `dotnet run --project .\RespectCounter.API\`
-- Start the ReactApp in another terminal `cd .\RespectCounter.ReactApp\; npm start `
+## **Features**
+- Users can browse a catalog of public figures, activities, quotes and comments.
+- Users can filter quotes, activities and public figures using tags.
+- Users can sign up and log in using their accounts.
+- Logged-in users can:
+    - Propose new public figures.
+    - Add quotes and activities and link them to existing public figures.
+    - Comment on and react to public figures, activities, and other comments.
+    <!-- - Report activities, quotes and comments of others. -->
+- Admins can:
+    - Verify public figures, quotes and activities added by users.
+    <!-- - Hide comments and activities. -->
 
-## Technicalities:
+---
+
+## **Technology Stack**
 - .NET 8
 - ASP.NET Core Web API
 - ASP.NET Core Identity
@@ -27,6 +29,35 @@
 - React 18.2.0
 - React-Bootstrap 2.8.0
 
+---
+
+## **Installation**
+
+Follow these steps to set up the project locally:
+1. **Requirements**
+    Ensure you have the following installed:
+    - [**.NET 8 SDK**](https://dotnet.microsoft.com/download/dotnet/8.0)  
+    - [**Node.js (v23.0.0)**](https://nodejs.org/)
+
+2. **Clone the repository:**
+   ```sh
+   git clone https://github.com/SzaroBury/RespectCounter.git
+   ```
+   
+3. **Start the API:**
+   ```sh
+   dotnet run --project ./RespectCounter.API/
+   ```
+
+4. **Start the React app:**
+   ```sh
+   cd ./RespectCounter.ReactApp/
+   npm install    # Restore dependencies
+   npm start      # Start the frontend application
+   ```
+
+---
+
 ## Main entities:
 - Person
 - Activity
@@ -34,19 +65,19 @@
 - Reaction
 - Tag
 
-![image](RespectCounterERD.png)
+![Entity Relationship Diagram](RespectCounterERD.png)
 
-## To do in frontend:
-- Home page - trending and latest added activities, quotes and public figures
-- Person page - list of public figures
-- Event page - tags
-- Page with details of an activity/quote - more detailed reactions and comments
-- Page with details of a public figure - description, respect, comments and activities
-- Page to add new public figure
-- Page to add new activity/quote
-- Page for moderators - verifying persons and activities
+---
 
-## To do in backend:
-- Pictures: for user avatars, for persons, for activities
-- Custom user class
-- Reports
+## To-Do List
+
+Planned improvements and features:
+- Implement JWT authentication
+- Improve data refreshing after user actions
+- Create a moderation page for verifying public figures and activities
+- Add an endpoint for requesting comment replies
+- Implement data hiding functionality
+- Improve the home page design
+- Implement pagination
+- Add support for user avatars and images for public figures and activities
+- Introduce a reporting system for activities and comments
