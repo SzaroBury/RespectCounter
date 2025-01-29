@@ -1,5 +1,5 @@
 import "./PersonDropdown.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function PersonDropdown({title, options, onPersonChange}) {
     const [inputValue, setInputValue] = useState("");
@@ -12,15 +12,19 @@ function PersonDropdown({title, options, onPersonChange}) {
 
     const handleSelect = (option) => {
         setSelectedOption(option);
-        setInputValue(option.fullName); 
         setShowDropdown(false);
-        onPersonChange(option.id);
+        
     };
 
     const handleClear = () => {
         setInputValue("");
         onPersonChange();
     }
+
+    useEffect(() => {
+        setInputValue(selectedOption.fullName);
+        onPersonChange(selectedOption.id);
+    }, [selectedOption])
 
     return(
     <div className="position-relative">
