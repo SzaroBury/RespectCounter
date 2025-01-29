@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function CreatePersonPage({}) {
+function CreatePersonPage() {
     const [formData, setFormData] = useState({firstName: '', lastName: '', nickName: '', decs: '', nationality: '', birthDate: '', deathDate: '', tags: ''});
     const navigate = useNavigate();
     
@@ -76,7 +76,7 @@ function CreatePersonPage({}) {
     );
 }
 
-function TagDropdown({}) {
+function TagDropdown() {
     const [ inputValue, setInputValue ] = useState("");
     const [ showDropdown, setShowDropdown ] = useState(false);
     const [ allTags, setAllTags ] = useState([]);
