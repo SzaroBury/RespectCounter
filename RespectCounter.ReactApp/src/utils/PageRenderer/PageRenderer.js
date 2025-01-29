@@ -10,7 +10,7 @@ import CreateActivityPage from "../../Pages/ActivitiesPage/CreateActivityPage/Cr
 import PersonsPage from '../../Pages/PersonsPage/PersonsPage';
 import CreatePersonPage from "../../Pages/PersonsPage/CreatePersonPage/CreatePersonPage";
 import PersonDetailsPage from "../../Pages/PersonsPage/PersonDetailsPage/PersonDetailsPage";
-import UnknownPage from "../../Pages/UnknownPage/UnknownPage";
+import NotFoundPage from "../../Pages/NotFoundPage/NotFoundPage";
 import AdminPage from "../../Pages/AdminPage/AdminPage";
 
 
@@ -28,7 +28,7 @@ const PageRenderer = () => {
                 <Route exact path="/about" element={<AboutPage />} />
                 <Route exact path="/signin" element={<SignInPage />} />
                 <Route exact path="/admin" element={<AdminPage />} />
-                <Route exact path="*" element={<UnknownPage />} />
+                <Route exact path="*" element={<NotFoundPage />} />
                 {/* <Route path="*" element={<Navigate to="/" />} /> */}
             </Routes>
         </div>
