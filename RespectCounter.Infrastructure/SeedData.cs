@@ -1,4 +1,4 @@
-using RespectCounter.Domain.Model;
+﻿using RespectCounter.Domain.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +6,7 @@ namespace RespectCounter.Infrastructure
 {
     internal static class SeedData
     {
-        private static IdentityUser? SysUser;
+        private static IdentityUser? admin;
 
         public static void Seed(ModelBuilder mb)
         {
@@ -115,7 +115,7 @@ namespace RespectCounter.Infrastructure
         private static void SeedIdentity(ModelBuilder mb)
         { 
             string adminRoleGuid = Guid.NewGuid().ToString();
-            string sysUserGuid = Guid.NewGuid().ToString();
+            string adminGuid = Guid.NewGuid().ToString();
 
             mb.Entity<IdentityRole>().HasData(new List<IdentityRole>
             {
@@ -124,16 +124,25 @@ namespace RespectCounter.Infrastructure
             });
 
             // Seed sys user
-            PasswordHasher<IdentityUser> passwordHasher = new PasswordHasher<IdentityUser>();
-            string pass = new PasswordHasher<IdentityUser>().HashPassword(null!, "123");
-            SysUser = new IdentityUser { UserName = "sys", PasswordHash = pass, Id = sysUserGuid };
-            mb.Entity<IdentityUser>().HasData(SysUser);
+            var hasher = new PasswordHasher<IdentityUser>();
+            admin = new IdentityUser 
+            { 
+                Id = adminGuid, 
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = "admin", 
+                NormalizedUserName = "ADMIN",
+                Email = "admin@example.com",
+                NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                // EmailConfirmed = true
+            };
+            admin.PasswordHash = hasher.HashPassword(admin, "Admin123!");
+            mb.Entity<IdentityUser>().HasData(admin);
 
             mb.Entity<IdentityUserRole<string>>().HasData(
                 new IdentityUserRole<string>()
-            {
-                UserId = sysUserGuid,
-                RoleId = adminRoleGuid
+                {
+                    UserId = adminGuid,
+                    RoleId = adminRoleGuid
                 }
             );
         }
@@ -151,9 +160,9 @@ namespace RespectCounter.Infrastructure
                 Status = status,
 
                 Created = DateTime.Now,
-                CreatedById = SysUser?.Id ?? "sys",
+                CreatedById = admin?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? "sys"
             };
         }
         private static Tag CreateDummyTag(Guid id, string name, int level = 5, string desc = "Test desc")
@@ -167,9 +176,9 @@ namespace RespectCounter.Infrastructure
                 //Persons = null
 
                 Created = DateTime.Now,
-                CreatedById = SysUser?.Id ?? "sys",
+                CreatedById = admin?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? "sys"
             };
         }
         private static Activity CreateDummyActivity(Guid id, Guid personId, string val, string loc, string desc, string source, DateTime? happend = null, ActivityType type = ActivityType.Quote, ActivityStatus status = ActivityStatus.NotVerified)
@@ -189,9 +198,9 @@ namespace RespectCounter.Infrastructure
                 //Comments
 
                 Created = DateTime.Now,
-                CreatedById = SysUser?.Id ?? "sys",
+                CreatedById = admin?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? "sys"
             };
         }
         private static Comment CreateDummyComment(Guid id, string content, Guid? perId = null, Guid? actId = null, Guid? parentId = null) //, List<Reaction>? rea = null, List<Comment>? chil = null
@@ -207,9 +216,9 @@ namespace RespectCounter.Infrastructure
                 //Children = chil ?? new(),
 
                 Created = DateTime.Now,
-                CreatedById = SysUser?.Id ?? "sys",
+                CreatedById = admin?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? "sys"
             };
         }
         private static Reaction CreateDummyReaction(Guid id, ReactionType type, Guid? perId = null, Guid? actId = null, Guid? comId = null)
@@ -223,9 +232,9 @@ namespace RespectCounter.Infrastructure
                 CommentId = comId,
 
                 Created = DateTime.Now,
-                CreatedById = SysUser?.Id ?? "sys",
+                CreatedById = admin?.Id ?? "sys",
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = SysUser?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? "sys"
             };
         }   
     }
