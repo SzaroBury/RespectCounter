@@ -13,14 +13,14 @@ function ActivityDetailsPage(params) {
     const { id } = useParams();
     const [ act, setAct ] = useState(null);
     const [ comments, setComments ] = useState([]);
-    const { isLoggedIn, user, openLoginPopup } = useAuth();
+    const { isLoggedIn } = useAuth();
     const navigate = useNavigate();
     const handleGoBack = (nav) => { nav(-1); }
 
     useEffect(() => {
         loadActivity(id, setAct);
         loadComments(id, setComments);
-      }, []);
+      }, [id]);
 
     const loadActivity = () => {
         console.log("ActivityDetailsPage: loadActivity(id: '" + id + "')");
