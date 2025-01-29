@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 
@@ -66,6 +67,11 @@ public static class MappingService
                 c.Children.OrderByDescending(ch => ch.Created).Select(ch => ch.ToDTO(levelsToSearch - 1)).ToList() 
                 : []
         );
+    }
+
+    public static ClaimDTO ToDTO(this Claim claim)
+    {
+        return new ClaimDTO(claim.Type, claim.Value);
     }
 
     public static SimplePersonDTO ToSimpleDTO(this Person p)
