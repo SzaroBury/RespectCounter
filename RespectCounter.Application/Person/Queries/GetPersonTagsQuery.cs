@@ -1,8 +1,7 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
-using RespectCounter.Infrastructure.Repositories;
+using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Application.Queries
 {

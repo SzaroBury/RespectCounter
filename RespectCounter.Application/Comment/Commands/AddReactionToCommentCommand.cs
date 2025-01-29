@@ -3,7 +3,7 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Model;
-using RespectCounter.Infrastructure.Repositories;
+using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Application.Commands
 {

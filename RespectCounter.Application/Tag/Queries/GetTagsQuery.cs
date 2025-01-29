@@ -1,5 +1,5 @@
 using MediatR;
-using RespectCounter.Infrastructure.Repositories;
+using RespectCounter.Domain.Interfaces;
 using RespectCounter.Domain.Model;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
 using MediatR;
 using RespectCounter.Domain.Model;
-using RespectCounter.Infrastructure.Repositories;
+using RespectCounter.Domain.Interfaces;
 
 namespace RespectCounter.Application.Commands
 {

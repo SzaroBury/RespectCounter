@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using RespectCounter.Infrastructure.Repositories;
+using RespectCounter.Domain.Interfaces;
 using RespectCounter.Domain.Model;
 using Microsoft.EntityFrameworkCore;
 using RespectCounter.Application.DTOs;
@@ -38,6 +38,8 @@ namespace RespectCounter.Application.Queries
                         )
                 );
             }
+
+            var token = uow.JwtService.GenerateToken;
             
             var included = persons.Include(p => p.Tags).Include(p => p.Reactions).Include(p => p.CreatedBy);
             

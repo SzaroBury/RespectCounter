@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Identity;
-using RespectCounter.Domain.Interfaces;
 
-namespace RespectCounter.Infrastructure.Repositories;
+namespace RespectCounter.Domain.Interfaces;
 
 public interface IUnitOfWork : IDisposable
 {
+    UserManager<IdentityUser> UserManager { get; }
+    IJwtService JwtService { get; }
     IRepository Repository();
-    UserManager<IdentityUser> UserManager { get; init; }
     Task<int> CommitAsync(CancellationToken cancellationToken);
 }
