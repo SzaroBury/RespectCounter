@@ -1,16 +1,14 @@
 import "./Header.css"
 import { useAuth } from '../../utils/AuthProvider/AuthProvider';
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-function Header({onLoginClick}) {
+function Header() {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const { isLoggedIn, user, logout, openLoginPopup } = useAuth();
-    const navigate = useNavigate();
 
 
     useEffect(() => {
-        // document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.setAttribute('data-bs-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
@@ -45,7 +43,7 @@ function Header({onLoginClick}) {
                 {
                     isLoggedIn ? (
                         <div className="d-flex h-100 align-items-center">
-                            <span className='me-3'>Hi {user}!</span>
+                            <span className='me-3'>{user}</span>
                             <button className='btn btn-outline-primary' onClick={logout}>Log out</button>    
                         </div>  
                         
