@@ -58,9 +58,9 @@ function CreateActivityPage() {
     const handleDataChange = (e) => {
         const { name, value } = e.target;
         if(name === "type") {
-            setFormData({...formData, ["type"]: Number(value)})
+            setFormData({...formData, [name]: Number(value)})
         } else if(name === "happend") {
-            setFormData({...formData, ["happend"]: new Date(value).toISOString()})
+            setFormData({...formData, [name]: new Date(value).toISOString()})
         } else {
             setFormData({...formData, [name]: value});
         };
