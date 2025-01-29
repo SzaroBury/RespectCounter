@@ -33,6 +33,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, string>
 
         var roles = await uow.UserManager.GetRolesAsync(user);
 
-        return uow.JwtService.GenerateToken(user);
+        return uow.JwtService.GenerateToken(user, roles);
     }
 }
