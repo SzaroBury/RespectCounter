@@ -1,9 +1,8 @@
 import "./Person.css";
-import { useNavigate as useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ReactionButtons from "../../../components/ReactionButtons/ReactionButtons";
 
 function Person({person, index}) {
-    const imagePath = person.imagePath === "" ? "default" : person.imagePath;
     const navigate = useNavigate();
     const onImgError = (e) => {
         e.target.onerror = null;
