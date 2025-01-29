@@ -12,6 +12,4 @@ public interface IRepository
     Task<T?> SingleOrDefaultAsync<T>(Expression<Func<T, bool>> expression, string includeProperties) where T : Entity;
     T Add<T>(T entity) where T : Entity;
     void Update<T>(T entity) where T : Entity;
-    // void UpdateRange<T>(IEnumerable<T> entities) where T : Entity;
-    // void Delete<T>(T entity) where T : Entity;
 }
