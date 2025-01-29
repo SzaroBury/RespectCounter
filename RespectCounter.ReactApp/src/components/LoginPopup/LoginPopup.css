@@ -41,7 +41,7 @@
     text-align: end;
 }
 
-.popup-signin-label {
+.popup-signup-label {
     grid-column: 2;
     text-align: center;
     align-content: center;
@@ -51,7 +51,7 @@
     text-align: end;
 }
 
-.popup-signin {
+.popup-signup {
     grid-column: 1/5;
     text-align: center;
     align-content: center;
