@@ -2,13 +2,13 @@ import "./LoginPopup.css";
 import { useState } from "react";
 import axios from 'axios';
 import { useAuth } from "../../utils/AuthProvider/AuthProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function LoginPopup() {
-    const [formData, setFormData] = useState({email: '', password: ''});
+    const [formData, setFormData] = useState({username: '', password: ''});
     const [showPassword, setShowPassword] = useState(false);
-    const [ validationMessage, setValidationMessage ] = useState("");
-    const { login, closeLoginPopup } = useAuth();
+    const [validationMessage, setValidationMessage] = useState("");
+    const {login, closeLoginPopup} = useAuth();
     const navigate = useNavigate();
 
     const handleDataChange = (e) => {
@@ -21,25 +21,26 @@ function LoginPopup() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        axios.defaults.withCredentials = true;
         try {
             console.log('LoginPopup: sending login request:', formData);
             setValidationMessage("");
-            const response = await axios.post('/login', formData, { params: { useCookies: true } } );
+            const response = await axios.post('api/auth/login', formData );
             console.log('LoginPopup: success ', response.data);
-            login(formData.email);
+            login( formData.username );
             closeLoginPopup();
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 console.warn('Unauthorized! Redirecting to login...');
-                setValidationMessage("Invalid username or password. Please try again.");
+                setValidationMessage(`Failed to login. ${error.response.data.message} Please try again.`);
             } else {
                 console.error('An error occurred:', error);
             }
         }        
     };
 
-    const handleSignInClick = () => {
-        navigate("/signin");
+    const handleSignUpClick = () => {
+        navigate("/signup");
         closeLoginPopup();
     }
 
@@ -48,11 +49,11 @@ function LoginPopup() {
             <div className="popup-container border">
                 <h2>Log In</h2>
                 <div className="popup-cancel">
-                    <button type="button" className="btn btn-outline-primary" onClick={closeLoginPopup}><i class="bi bi-x-lg"></i></button>
+                    <button type="button" className="btn btn-outline-primary" onClick={closeLoginPopup}><i className="bi bi-x-lg"></i></button>
                 </div>
                 <form onSubmit={handleLogin}>
                     <div className="input-group mb-3">
-                        <input type="text" className="form-control" placeholder="Email" name="email" required
+                        <input type="text" className="form-control" placeholder="Username" name="username" required
                             onChange={handleDataChange}/>                        
                     </div>
                     <div className="input-group mb-3">
@@ -80,11 +81,11 @@ function LoginPopup() {
                         <span className="text-danger">{validationMessage}</span>
                     </div>
                 </form>
-                <div className="popup-signin">
-                    <button className="btn me-2" onClick={handleSignInClick}>
-                        Sign in
+                <div className="popup-signup">
+                    <button className="btn me-2" onClick={handleSignUpClick}>
+                        Sign up
                     </button>
-                    <label className="popup-signin-label">if you don't have an account yet.</label>
+                    <label className="popup-signup-label">if you don't have an account yet.</label>
                 </div>
                 
             </div>
