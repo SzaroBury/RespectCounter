@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using RespectCounter.Domain.Interfaces;
+using RespectCounter.Infrastructure.Services;
 
 namespace RespectCounter.Infrastructure.Repositories;
 

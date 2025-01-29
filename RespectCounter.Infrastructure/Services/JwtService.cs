@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RespectCounter.Domain.Interfaces;
 
+namespace RespectCounter.Infrastructure.Services;
+
 public class JwtService: IJwtService
 {
     private readonly IConfiguration config;
