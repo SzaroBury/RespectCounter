@@ -21,7 +21,7 @@ function PersonDetailsPage() {
     useEffect(() => {
         loadPerson(id, setPerson);
         loadComments(id, setComments);
-      }, []);
+      }, [id]);
 
     const loadPerson = () => {
         console.log("PersonDetailsPage: loadPerson(id: '" + id + "')");
