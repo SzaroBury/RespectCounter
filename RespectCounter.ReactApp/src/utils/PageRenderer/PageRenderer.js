@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '../../Pages/HomePage/HomePage';
 import AboutPage from '../../Pages/AboutPage/AboutPage';
-import SignInPage from '../../Pages/SignInPage/SignInPage';
+import SignUpPage from '../../Pages/SignUpPage/SignUpPage';
 import ActivitiesPage from '../../Pages/ActivitiesPage/ActivitiesPage';
 import ActivityDetailsPage from '../../Pages/ActivitiesPage/ActivityDetailsPage/ActivityDetailsPage';
 import CreateActivityPage from "../../Pages/ActivitiesPage/CreateActivityPage/CreateActivityPage";
@@ -26,7 +26,7 @@ const PageRenderer = () => {
                 <Route exact path="/person/create" element={<CreatePersonPage />} />
                 <Route exact path="/person/:id" element={<PersonDetailsPage />} />
                 <Route exact path="/about" element={<AboutPage />} />
-                <Route exact path="/signin" element={<SignInPage />} />
+                <Route exact path="/signup" element={<SignUpPage />} />
                 <Route exact path="/admin" element={<AdminPage />} />
                 <Route exact path="*" element={<NotFoundPage />} />
                 {/* <Route path="*" element={<Navigate to="/" />} /> */}

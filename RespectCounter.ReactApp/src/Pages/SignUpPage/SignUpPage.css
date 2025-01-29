@@ -1,15 +1,15 @@
-.signin {
+.signup {
     grid-column: 2;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     grid-template-rows: 1fr 3fr
 }
 
-.signin-header {
+.signup-header {
     grid-column: 2;
     margin-top: 2rem;
 }
 
-.signin-form {
+.signup-form {
     grid-column: 2;
 }
