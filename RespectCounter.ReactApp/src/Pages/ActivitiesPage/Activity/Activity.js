@@ -1,12 +1,8 @@
 import "./Activity.css";
 import { Link } from "react-router-dom";
 import ReactionButtons from "../../../components/ReactionButtons/ReactionButtons";
-import { useEffect } from "react";
 
 function Activity({a, showCommentsButton=true}) {
-    useEffect(() => {
-        console.log(a);
-    }, [])
 
     return (
         <div key={"activity_" + a.id} className='activity border'>
