@@ -1,8 +1,9 @@
 import './Comment.css';
 import { useEffect, useState } from "react";
-import ReactionButtons from '../ReactionButtons/ReactionButtons';
 import { useAuth } from '../../utils/AuthProvider/AuthProvider';
-import axios from 'axios';
+import ReactionButtons from '../ReactionButtons/ReactionButtons';
+import ReplyForm from './ReplyForm/ReplyForm';
+import Replies from './Replies/Replies';
 
 function Comment({comment, onReplyAdded}) {
     const imagePath = comment.imagePath ?? "/users/default.png";
@@ -83,90 +84,6 @@ function Comment({comment, onReplyAdded}) {
                 count={comment.childrenCount} 
             />
         </>
-    );
-}
-
-function ReplyForm({commentId, onReplyAdded, onCancel}) {
-    const [ inputValue, setInputValue ] = useState('');
-    const { isLoggedIn, openLoginPopup, logout } = useAuth();
-
-    const handleInputValueChange = (e) => {
-        setInputValue(e.target.value);
-    };
-
-    const handleAddCommentClick = async () => {
-        if(!isLoggedIn) 
-        {
-            openLoginPopup();
-            return;
-        }
-        
-        try {
-            console.log('ReplyForm: sending a reply request.');
-            const response = await axios.post(`/api/comment/${commentId}`, inputValue, {
-                headers: { 
-                    "Content-Type": "application/json" 
-                }
-            });
-            console.log('ReplyForm: success ', response.data);
-            if(onReplyAdded) onReplyAdded();
-            setInputValue('');
-        } catch (error) {
-            if(error.status === 401) {
-                logout();
-                onCancel();
-            } else {
-                console.error('Error:', error);
-            };
-        }
-    };
-
-    return(
-        <div className="comment-reply-form input-group">
-            <span className="input-group-text">Reply: </span>
-            <input className="form-control" value={inputValue} onChange={handleInputValueChange}/>
-            <button className="btn btn-outline-primary" onClick={onCancel}><i className="bi bi-x-square-fill"></i></button>
-            <button className="btn btn-outline-primary" onClick={handleAddCommentClick}><i className="bi bi-caret-right-fill"></i></button>
-        </div>
-    );
-}
-
-function Replies({replies, count}) {
-    const [showReplies, setShowReplies] = useState(false);
-
-    return(
-        <div>
-        {
-            showReplies ? (
-                <div className='mt-2'>
-                    <span onClick={() => {setShowReplies(false)}}>
-                        <i className="bi bi-caret-up-fill me-2"></i>
-                        Hide replies
-                    </span>
-                    {replies.map(reply => 
-                        <div className='comment-child'>
-                            <Comment 
-                                key={"Comment_" + reply.id} 
-                                comment={reply} 
-                            />
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <>
-                    {
-                        count > 0 &&
-                        <div className='mt-2'>
-                            <span onClick={() => { setShowReplies(true) }}>
-                                <i className="bi bi-caret-down-fill me-2"></i>
-                                {count === 1 ? "Show reply" : `Show ${count} replies`}
-                            </span> 
-                        </div>
-                    }
-                </>
-            )
-        }
-        </div>
     );
 }
 
