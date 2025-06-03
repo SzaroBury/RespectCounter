@@ -1,58 +1,50 @@
 using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
-namespace RespectCounter.Application.Commands
+namespace RespectCounter.Application.Commands;
+
+public record AddCommentToPersonCommand(Guid PersonId, string Content, Guid UserId) : IRequest<Person>;
+
+public class AddCommentToPersonCommandHandler : IRequestHandler<AddCommentToPersonCommand, Person>
 {
-    public record AddCommentToPersonCommand() : IRequest<Person>
+    private readonly IUnitOfWork uow;
+    private readonly IUserService userService;
+
+    public AddCommentToPersonCommandHandler(IUnitOfWork uow, IUserService userService)
     {
-        public required string PersonId { get; set; }
-        public required string Content { get; set; }
-        public required ClaimsPrincipal User { get; set; }
+        this.uow = uow;
+        this.userService = userService;
     }
 
-    public class AddCommentToPersonCommandHandler : IRequestHandler<AddCommentToPersonCommand, Person>
+    public async Task<Person> Handle(AddCommentToPersonCommand request, CancellationToken cancellationToken)
     {
-        private readonly IUnitOfWork uow;
+        throw new NotImplementedException();
+        User? user = await userService.GetByIdAsync(request.UserId);
+        if(user == null) throw new SecurityException("Authentication issue. No user found.");
 
-        public AddCommentToPersonCommandHandler(IUnitOfWork uow)
-        {
-            this.uow = uow;
-        }
+        //Person? targetPerson = await uow.Repository().FindByIdAsync<Person>(request.PersonId) ?? throw new KeyNotFoundException("There is no person object with the given id value.");
 
-        public async Task<Person> Handle(AddCommentToPersonCommand request, CancellationToken cancellationToken)
-        {
-            IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-            if(user == null) throw new SecurityException("Authentication issue. No user found.");
+        // DateTime now = DateTime.Now;
 
-            DateTime now = DateTime.Now;
-            Guid personId;
-            if(!Guid.TryParse(request.PersonId, out personId))  throw new ArgumentException("Invalid id format.");
+        // Comment comment = new Comment 
+        // {
+        //     PersonId = request.PersonId,
+        //     Content = request.Content,
+            
+        //     Created = now,
+        //     CreatedById = user.Id,
+        //     LastUpdated = now,
+        //     LastUpdatedById = user.Id,
+        // };
+        // targetPerson.Comments.Add(comment);
+        // await uow.CommitAsync(cancellationToken);
 
-            Person? targetPerson = await uow.Repository().GetById<Person>(personId);
-            if(targetPerson == null) throw new KeyNotFoundException("There is no person object with the given id value.");
+        // //cleaning data before sending it to the client
+        // comment.CreatedBy = null;
+        // comment.LastUpdatedBy = null;
 
-            Comment comment = new Comment 
-            {
-                PersonId = personId,
-                Content = request.Content,
-                
-                Created = now,
-                CreatedById = user.Id,
-                LastUpdated = now,
-                LastUpdatedById = user.Id,
-            };
-            targetPerson.Comments.Add(comment);
-            await uow.CommitAsync(cancellationToken);
-
-            //cleaning data before sending it to the client
-            comment.CreatedBy = null;
-            comment.LastUpdatedBy = null;
-
-            return targetPerson;
-        }
+        // return targetPerson; //toDTO
     }
 }

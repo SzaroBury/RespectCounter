@@ -1,39 +1,36 @@
 using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands
 {
-    public record AddTagToActivityCommand(string ActivityId, string TagName, ClaimsPrincipal User) : IRequest<Activity>;
+    public record AddTagToActivityCommand(Guid ActivityId, string TagName, Guid UserId) : IRequest<Activity>;
 
     public class AddTagToActivityCommandHandler : IRequestHandler<AddTagToActivityCommand, Activity>
     {
         private readonly IUnitOfWork uow;
+        private readonly IUserService userService;
 
-        public AddTagToActivityCommandHandler(IUnitOfWork uow)
+        public AddTagToActivityCommandHandler(IUnitOfWork uow, IUserService userService)
         {
             this.uow = uow;
+            this.userService = userService;
         }
 
         public async Task<Activity> Handle(AddTagToActivityCommand request, CancellationToken cancellationToken)
         {
-            IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-            if(user == null) throw new SecurityException("Authentication issue. No user found.");
+            User? user = await userService.GetByIdAsync(request.UserId)
+                ?? throw new SecurityException("Authentication issue. No user found.");
 
-            DateTime now = DateTime.Now;
-            Guid activityId;
-            if(!Guid.TryParse(request.ActivityId, out activityId))  throw new ArgumentException("Invalid id format.");
-
-            Activity? targetActivity = await uow.Repository().SingleOrDefaultAsync<Activity>(a => a.Id == activityId, "Tags");
-            if(targetActivity == null) throw new KeyNotFoundException("There is no activity object with the given id value.");
-
+            Activity? targetActivity = await uow.Repository().SingleOrDefaultAsync<Activity>(a => a.Id == request.ActivityId, "Tags")
+                ?? throw new KeyNotFoundException("There is no activity object with the given id value.");
+                
             Tag? existingTag = uow.Repository().FindQueryable<Tag>(t => t.Name.ToLower() == request.TagName.ToLower()).FirstOrDefault();
             if(existingTag == null)
             {
-                Tag newTag = new Tag 
+                DateTime now = DateTime.Now;
+                Tag newTag = new()
                 {
                     Name = request.TagName,
                     Description = $"Created for {targetActivity.Id} activity object.",

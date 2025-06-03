@@ -1,6 +1,6 @@
-namespace RespectCounter.API.Models;
+namespace RespectCounter.API.Requests;
 
-public record ProposePersonModel(
+public record ProposePersonRequest(
     string FirstName, 
     string LastName, 
     string? NickName,

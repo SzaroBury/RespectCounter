@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using RespectCounter.Domain.Interfaces;
-using RespectCounter.Infrastructure.Services;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Infrastructure.Repositories;
 
@@ -12,13 +9,9 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly RespectDbContext context;
     private bool disposed;
-    public UserManager<IdentityUser> UserManager { get; init; }
-    public IJwtService JwtService { get; init; }
-    public UnitOfWork(RespectDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
+    public UnitOfWork(RespectDbContext context)
     {
         this.context = context;
-        UserManager = userManager;
-        JwtService = new JwtService(configuration);
         context.Database.EnsureCreated();
     }
 
@@ -50,7 +43,6 @@ public class UnitOfWork : IUnitOfWork
             if (disposing)
             {
                 context.Dispose();
-                UserManager.Dispose();
             }
         }
         disposed = true;

@@ -27,7 +27,7 @@ function Activity({a, showCommentsButton=true}) {
             <div className="activity-actions">
                 {showCommentsButton && <CommentsButton act={a} />}
                 <div className="activity-reaction-buttons">
-                    <ReactionButtons respect={a.respect} targetActivityId={a.id} />
+                    <ReactionButtons respect={a.respect} reaction={a.currentUsersReaction} targetActivityId={a.id} />
                 </div>
             </div>
         </div>

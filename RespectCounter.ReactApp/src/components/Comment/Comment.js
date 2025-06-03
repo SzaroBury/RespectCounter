@@ -67,6 +67,7 @@ function Comment({comment, onReplyAdded}) {
                         <ReactionButtons 
                             respect={comment.respect} 
                             targetParentId={comment.id}
+                            reaction={comment.currentUsersReaction}
                         />
                     </div>
                 </div>

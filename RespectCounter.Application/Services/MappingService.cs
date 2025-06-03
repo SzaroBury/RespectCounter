@@ -6,7 +6,7 @@ namespace RespectCounter.Application;
 
 public static class MappingService
 {
-    public static ActivityDTO ToDTO(this Activity a)
+    public static ActivityDTO ToDTO(this Activity a, Guid? userGuid)
     {
         return new ActivityDTO(
             a.Id.ToString(),
@@ -14,8 +14,8 @@ public static class MappingService
             $"{a.Person?.FirstName ?? "?"} {a.Person?.LastName ?? "?"}",
             RespectService.CountRespect(a.Person?.Reactions ?? []),
             $"person_{a.Person?.LastName}.jpg",
-            a.CreatedBy?.UserName ?? "??",
-            a.CreatedById,
+            a.CreatedBy?.Username ?? "??",
+            a.CreatedById.ToString(),
             a.Value,
             a.Description,
             a.Location,
@@ -24,11 +24,12 @@ public static class MappingService
             a.Happend?.ToLongDateString() ?? "",
             a.Comments.Count + a.Comments.Sum(c => c.ChildrenCount),
             (int)a.Type,
-            RespectService.CountRespect(a.Reactions)
+            RespectService.CountRespect(a.Reactions),
+            a.Reactions.Find(r => r.CreatedById == userGuid)?.ReactionType
         );
     } 
 
-    public static PersonDTO ToDTO(this Person p)
+    public static PersonDTO ToDTO(this Person p, Guid? userGuid)
     {
         return new PersonDTO(
             p.Id.ToString(),
@@ -41,20 +42,21 @@ public static class MappingService
             p.Nationality,
             p.Birthday?.ToString() ?? "",
             p.DeathDate?.ToString() ?? "",
-            p.CreatedBy?.UserName ?? "??",
-            p.CreatedById, 
+            p.CreatedBy?.Username ?? "??",
+            p.CreatedById.ToString(), 
             p.Tags.OrderByDescending(t => t.Count).Select(t => t.ToSimpleDTO()).ToList(),
             p.Activities.Count,
-            RespectService.CountRespect(p.Reactions)
+            RespectService.CountRespect(p.Reactions),
+            p.Reactions.Find(r => r.CreatedById == userGuid)?.ReactionType
         );
     }
 
-    public static CommentDTO ToDTO(this Comment c, int levelsToSearch)
+    public static CommentDTO ToDTO(this Comment c, int levelsToSearch, Guid? userGuid = null)
     {
         return new CommentDTO(
             c.Id.ToString(),
-            c.CreatedBy?.UserName ?? "??",
-            c.CreatedById,
+            c.CreatedBy?.Username ?? "??",
+            c.CreatedById.ToString(),
             c.Created.ToString("o"),
             c.Content, 
             c.ActivityId?.ToString() ?? "",
@@ -64,8 +66,9 @@ public static class MappingService
             RespectService.CountRespect(c.Reactions),
             c.ChildrenCount,
             levelsToSearch > 0 ? 
-                c.Children.OrderByDescending(ch => ch.Created).Select(ch => ch.ToDTO(levelsToSearch - 1)).ToList() 
-                : []
+                c.Children.OrderByDescending(ch => ch.Created).Select(ch => ch.ToDTO(levelsToSearch - 1, userGuid)).ToList() 
+                : [],
+            c.Reactions.Find(r => r.CreatedById == userGuid)?.ReactionType
         );
     }
 

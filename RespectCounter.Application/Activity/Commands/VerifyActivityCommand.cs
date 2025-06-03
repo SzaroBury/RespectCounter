@@ -1,10 +1,10 @@
 using MediatR;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands
 {
-    public record VerifyActivityCommand(string Id) : IRequest<Activity>;
+    public record VerifyActivityCommand(Guid Id) : IRequest<Activity>;
 
     public class VerifyActivityCommandHandler : IRequestHandler<VerifyActivityCommand, Activity>
     {
@@ -18,16 +18,10 @@ namespace RespectCounter.Application.Commands
         public async Task<Activity> Handle(VerifyActivityCommand request, CancellationToken cancellationToken)
         {
             DateTime now = DateTime.Now;
-            Guid guid;
-
-            if(!Guid.TryParse(request.Id, out guid))
-            {
-                throw new ArgumentException("The given 'id' parameter is not a valid guid value.");
-            }
 
             //Get the activity
-            Activity? a = await uow.Repository().GetById<Activity>(guid);
-            if(a == null) throw new KeyNotFoundException();
+            Activity? a = await uow.Repository().FindByIdAsync<Activity>(request.Id)
+                ?? throw new KeyNotFoundException($"The activity with the given ID ({request.Id}) was not found.");
 
             //Modify the person
             a.Status = ActivityStatus.Verified;

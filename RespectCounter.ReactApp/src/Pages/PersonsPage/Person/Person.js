@@ -37,7 +37,11 @@ function Person({person, index}) {
         }
         <div className="person-actions">
             <div className="person-reaction-buttons">
-                <ReactionButtons respect={person.respect} targetPersonId={person.id} />
+                <ReactionButtons 
+                    respect={person.respect} 
+                    targetPersonId={person.id} 
+                    reaction={person.currentUsersReaction}
+                />
             </div>
         </div>
         

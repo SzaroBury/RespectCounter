@@ -62,6 +62,7 @@ function ActivitiesPage(props) {
         axios.get(`/api/${targetUrl}`, requestParams)
         .then(response => {
             setActivities(response.data);
+            console.log("Loaded activities: ", response.data); // to delete
             setLoading(false);
         })
         .catch(error => {

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RespectCounter.Domain\RespectCounter.Domain.csproj" />
+    <ProjectReference Include="..\RespectCounter.Application\RespectCounter.Application.csproj" />
   </ItemGroup>
 
 </Project>

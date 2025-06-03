@@ -1,11 +1,12 @@
 ﻿using RespectCounter.Domain.Model;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using RespectCounter.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace RespectCounter.Infrastructure
 {
-    public class RespectDbContext : IdentityDbContext<IdentityUser>
+    public class RespectDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
         //To add migration:         dotnet-ef migrations add <migration name> -p RespectCounter.Infrastructure -s RespectCounter.API -c RespectDbContext
         //To apply migration:       dotnet-ef update database
@@ -24,12 +25,23 @@ namespace RespectCounter.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Activity>().Ignore(t => t.CreatedBy);
+            modelBuilder.Entity<Activity>().Ignore(t => t.LastUpdatedBy);
+            modelBuilder.Entity<Person>().Ignore(t => t.CreatedBy);
+            modelBuilder.Entity<Person>().Ignore(t => t.LastUpdatedBy);
+            modelBuilder.Entity<Comment>().Ignore(t => t.CreatedBy);
+            modelBuilder.Entity<Comment>().Ignore(t => t.LastUpdatedBy);
+            modelBuilder.Entity<Reaction>().Ignore(t => t.CreatedBy);
+            modelBuilder.Entity<Reaction>().Ignore(t => t.LastUpdatedBy);
+            modelBuilder.Entity<Tag>().Ignore(t => t.CreatedBy);
+            modelBuilder.Entity<Tag>().Ignore(t => t.LastUpdatedBy);
+            modelBuilder.Entity<AppUser>().Ignore(u => u.RecentlyBrowsedTags);
+            modelBuilder.Entity<AppUser>().Ignore(u => u.FavoriteTags);
+
             modelBuilder.Entity<Person>().HasMany(p => p.Tags).WithMany(t => t.Persons).UsingEntity("PersonHasTag");
             modelBuilder.Entity<Activity>().HasMany(p => p.Tags).WithMany(t => t.Activities).UsingEntity("ActivityHasTag");
 
             SeedData.Seed(modelBuilder);
-            //The seeding code should not be part of the normal app execution as this can cause concurrency issues when multiple instances are running and would also require the app having permission to modify the database schema
-            //https://learn.microsoft.com/en-us/ef/core/modeling/data-seeding#custom-initialization-logic
         }
     }
 }

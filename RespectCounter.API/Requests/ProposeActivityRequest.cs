@@ -1,6 +1,6 @@
-namespace RespectCounter.API.Models;
+namespace RespectCounter.API.Requests;
 
-public record ProposeActivityModel(
+public record ProposeActivityRequest(
     int Type, 
     string PersonId,
     string Title, 

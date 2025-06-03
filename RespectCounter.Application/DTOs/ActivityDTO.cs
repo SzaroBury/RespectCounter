@@ -1,3 +1,5 @@
+using RespectCounter.Domain.Model;
+
 namespace RespectCounter.Application.DTOs;
 
 public record ActivityDTO(
@@ -16,5 +18,6 @@ public record ActivityDTO(
     string Happend, 
     int CommentsCount,
     int Type, 
-    int Respect 
+    int Respect,
+    ReactionType? CurrentUsersReaction
 );

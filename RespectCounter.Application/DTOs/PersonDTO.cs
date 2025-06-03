@@ -1,3 +1,5 @@
+using RespectCounter.Domain.Model;
+
 namespace RespectCounter.Application.DTOs;
 
 public record PersonDTO(
@@ -15,5 +17,6 @@ public record PersonDTO(
     string CreatedById, 
     List<SimpleTagDTO> Tags,
     int ActivitiesCount,
-    int Respect 
+    int Respect,
+    ReactionType? CurrentUsersReaction
 );

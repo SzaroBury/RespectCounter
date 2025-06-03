@@ -1,38 +1,43 @@
+using System.Security;
 using MediatR;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Application.DTOs;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands;
 
-public record LoginCommand(string Username, string Password) : IRequest<string>;
+public record LoginCommand(string Username, string Password) : IRequest<AuthTokensDTO>;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, string>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthTokensDTO>
 {
-    private readonly IUnitOfWork uow;
+    private readonly IUserService userService;
+    private readonly IMediator mediator;
 
-    public LoginCommandHandler(IUnitOfWork uow)
+    public LoginCommandHandler(IUserService userService, IMediator mediator)
     {
-        this.uow = uow;
+        this.userService = userService;
+        this.mediator = mediator;
     }
 
-    public async Task<string> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<AuthTokensDTO> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await uow.UserManager.FindByNameAsync(request.Username);
+        var user = await userService.FindByNameAsync(request.Username);
         if (user == null)
         {
-            user = await uow.UserManager.FindByEmailAsync(request.Username);
+            user = await userService.FindByEmailAsync(request.Username);
             if(user == null)
             {
-                throw new UnauthorizedAccessException("Invalid username.");
+                throw new SecurityException($"{request.Username} was not found.");
             }
-        }        
+        }  
 
-        if (!await uow.UserManager.CheckPasswordAsync(user, request.Password))
+        if (!await userService.CheckPasswordAsync(request.Username, request.Password))
         {
-            throw new UnauthorizedAccessException("Invalid password.");
+            throw new SecurityException("Incorrect password.");
         }
 
-        var roles = await uow.UserManager.GetRolesAsync(user);
+        var generateTokensCommand = new GenerateTokensCommand(user);
+        var tokens = await mediator.Send(generateTokensCommand, cancellationToken);
 
-        return uow.JwtService.GenerateToken(user, roles);
+        return tokens;
     }
 }

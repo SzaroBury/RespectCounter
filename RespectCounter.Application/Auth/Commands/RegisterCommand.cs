@@ -1,67 +1,52 @@
+using System.Security;
 using MediatR;
-using RespectCounter.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using RespectCounter.Application.DTOs;
+using RespectCounter.Domain.Contracts;
+using RespectCounter.Domain.Model;
 
 namespace RespectCounter.Application.Commands;
 
-public record RegisterCommand(string Email, string Username, string Password) : IRequest<IdentityResult>;
+public record RegisterCommand(string Email, string Username, string Password) : IRequest<AuthTokensDTO>;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, IdentityResult>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthTokensDTO>
 {
-    private readonly IUnitOfWork uow;
+    private readonly IUserService userService;
+    private readonly IMediator mediator;
 
-    public RegisterCommandHandler(IUnitOfWork uow)
+    public RegisterCommandHandler(IUserService userService, IMediator mediator)
     {
-        this.uow = uow;
+        this.userService = userService;
+        this.mediator = mediator;
     }
 
-    public async Task<IdentityResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<AuthTokensDTO> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        var listOfErrors = new List<IdentityError>();
         if (string.IsNullOrEmpty(request.Username))
         {
-            IdentityError error = new();
-            error.Code = "UsernameRequired";
-            error.Description = "Username is required.";
-            listOfErrors.Add(error);
+            throw new SecurityException("Username is required.");
         }
-        if (await uow.UserManager.FindByNameAsync(request.Username) != null)
+        if (await userService.GetByNameAsync(request.Username) != null)
         {
-            IdentityError error = new();
-            error.Code = "UsernameTaken";
-            error.Description = "Username is already in use.";
-            listOfErrors.Add(error);
+            throw new SecurityException("Username is already in use.");
         }
         if (string.IsNullOrEmpty(request.Email))
         {
-            IdentityError error = new();
-            error.Code = "EmailRequired";
-            error.Description = "Email is required.";
-            listOfErrors.Add(error);
+            throw new SecurityException("Email is required.");
         }
-        if(await uow.UserManager.FindByEmailAsync(request.Email) != null)
+        if(await userService.GetByEmailAsync(request.Email) != null)
         {
-            IdentityError error = new();
-            error.Code = "EmailTaken";
-            error.Description = "Email is already in use.";
-            listOfErrors.Add(error);
+            throw new SecurityException("Email is already in use.");
         }
-        if (string.IsNullOrEmpty(request.Password))
+        if (string.IsNullOrWhiteSpace(request.Password))
         {
-            IdentityError error = new();
-            error.Code = "PasswordRequired";
-            error.Description = "Password cannot be empty.";
-            listOfErrors.Add(error);
+            throw new SecurityException("Password cannot be empty.");
         }
 
-        if(listOfErrors.Count > 0)
-        {
-            return IdentityResult.Failed(listOfErrors.ToArray());
-        }
+        var user = await userService.CreateAsync(request.Username, request.Email, request.Password);
 
-        var user = new IdentityUser(request.Username);
-        user.Email = request.Email;
-        var result = await uow.UserManager.CreateAsync(user, request.Password); //to-do: implement cancellationToken
-        return result;
+        var generateTokensCommand = new GenerateTokensCommand(user);
+        var tokens = await mediator.Send(generateTokensCommand, cancellationToken);
+
+        return tokens;
     }
 }

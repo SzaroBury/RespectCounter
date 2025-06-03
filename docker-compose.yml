@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "SomeStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  api:
+    build:
+      context: .
+      dockerfile: RespectCounter.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=Server=db;Database=RespectDb;User=sa;Password=SomeStrong!Passw0rd;TrustServerCertificate=True
+    ports:
+      - "5292:8080"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./RespectCounter.ReactApp
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  mssql_data:

@@ -1,11 +1,8 @@
-using System.Globalization;
 using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands;
 
@@ -15,52 +12,34 @@ public record AddPersonCommand(
     string NickName,
     string Description, 
     string Nationality, 
-    string? Birthday, 
-    string? DeathDate, 
+    DateTime? Birthday, 
+    DateTime? DeathDate, 
     string Tags,
-    ClaimsPrincipal User
+    Guid UserId
 ) : IRequest<PersonDTO>;
 
 public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, PersonDTO>
 {
     private readonly IUnitOfWork uow;
+    private readonly IUserService userService;
 
-    public AddPersonCommandHandler(IUnitOfWork uow)
+    public AddPersonCommandHandler(IUnitOfWork uow, IUserService userService)
     {
         this.uow = uow;
+        this.userService = userService;
     }
 
     public async Task<PersonDTO> Handle(AddPersonCommand request, CancellationToken cancellationToken)
     {
+        User? user = await userService.GetByIdAsync(request.UserId)
+            ?? throw new SecurityException("Authentication issue. No user found.");
+
+        DateOnly? birthday = request.Birthday.HasValue ? DateOnly.FromDateTime(request.Birthday.Value) : null;
+        DateOnly? deathDate = request.DeathDate.HasValue ? DateOnly.FromDateTime(request.DeathDate.Value) : null;
+
         DateTime now = DateTime.Now;
-        Guid newId = Guid.NewGuid();
-        DateOnly? birthday = null;
-        DateOnly? deathDate = null;
-
-        IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-        if(user == null) throw new SecurityException("Authentication issue. No user found.");
-
-        if(!string.IsNullOrEmpty(request.Birthday))
+        Person? newPerson = new()
         {
-            if(!DateOnly.TryParseExact(request.Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly parsedDate))
-            {
-                throw new ArgumentException("Invalid date format. Expected format: yyyy-MM-dd", "Birthday");
-            }
-            birthday = parsedDate;
-        }
-
-        if(!string.IsNullOrEmpty(request.DeathDate))
-        {
-            if(!DateOnly.TryParseExact(request.DeathDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly parsedDate))
-            {
-                throw new ArgumentException("Invalid date format. Expected format: yyyy-MM-dd", "DeathDate");
-            }
-            deathDate = parsedDate;
-        }
-
-        Person? newPerson = new Person
-        {
-            Id = newId,
             FirstName = request.FirstName,
             LastName = request.LastName,
             NickName = request.NickName,
@@ -89,9 +68,9 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, PersonD
                     Level = 5,
                     
                     Created = now,
-                    CreatedById = "sys",
+                    CreatedById = Guid.Empty,
                     LastUpdated = now,
-                    LastUpdatedById = "sys"
+                    LastUpdatedById = Guid.Empty
                 };
                 existingTag = uow.Repository().Add(newTag);
             }
@@ -100,7 +79,6 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, PersonD
         var result = uow.Repository().Add(newPerson);
         await uow.CommitAsync(cancellationToken);
 
-        if(newPerson != null) return result.ToDTO();
-        else throw new Exception("Unknown error during saving.");
+        return result.ToDTO(request.UserId);
     }
 }

@@ -1,7 +1,8 @@
+using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RespectCounter.API.Models;
+using RespectCounter.API.Requests;
 using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
 
@@ -9,110 +10,80 @@ namespace RespectCounter.API.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController: ControllerBase
+public class AuthController : ControllerBase
 {
-    private readonly ILogger<TagController> logger;
+    private readonly ILogger<AuthController> logger;
     private readonly ISender mediator;
-    
 
-    public AuthController(ILogger<TagController> logger, ISender mediator)
+
+    public AuthController(ILogger<AuthController> logger, ISender mediator)
     {
         this.logger = logger;
         this.mediator = mediator;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel request)
+    public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
-        try
-        {
-            CookieOptions option = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(10)
-            };
-    
-            var command = new LoginCommand(request.Username, request.Password);
-            var token = await mediator.Send(command);
+        logger.LogInformation($"{DateTime.Now}: Login([LoginRequest])");
 
-            Response.Cookies.Append("jwt", token, option);
-            return Ok(new { message = "Login successful" });
-        }
-        catch (UnauthorizedAccessException e)
-        {
-            return Unauthorized(new { message = e.Message });
-        }
-        catch (Exception e)
-        {
-            var errorResponse = new
-            {
-                title = "Internal Server Error",
-                message = $"An unexpected error occurred: '{e.Message}'."
-            };
-            return StatusCode(500, errorResponse);
-        }
+        var command = new LoginCommand(request.Username, request.Password);
+        var tokens = await mediator.Send(command);
+
+        AppendSecureCookie("AccessToken", tokens.AccessToken, tokens.AccessTokenExpiration);
+        AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
+        return Ok("Login successful");
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel request)
+    public async Task<IActionResult> RegisterAsync(RegisterRequest request)
     {
-        try
-        {
-            CookieOptions option = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(10)
-            };
-    
-            var command = new RegisterCommand(request.Email, request.Username, request.Password);
-            var result = await mediator.Send(command);
-            if (result.Succeeded)
-            {
-                var loginCommand = new LoginCommand(request.Username, request.Password);
-                var token = await mediator.Send(loginCommand);
-                Response.Cookies.Append("jwt", token, option);
-                return Ok(new { message = "User registered successfully" });
-            }
-            var errorMessage = $"Failed: {string.Join(" ", result.Errors.Select(x => x.Description).ToList())}";
-            return BadRequest(new { title = "Bad request", message = errorMessage });
-        }
-        catch (Exception e)
-        {
-            var errorResponse = new
-            {
-                title = "Internal Server Error",
-                message = $"An unexpected error occurred: '{e.Message}'."
-            };
-            return StatusCode(500, errorResponse);
-        }
+        logger.LogInformation($"{DateTime.Now}: Register([RegisterRequest])");
+
+        var command = new RegisterCommand(request.Email, request.Username, request.Password);
+        var tokens = await mediator.Send(command);
+
+        AppendSecureCookie("AccessToken", tokens.AccessToken, tokens.AccessTokenExpiration);
+        AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
+
+        return Ok("Tokens refreshed successfully");
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshAsync()
+    {
+        logger.LogInformation($"{DateTime.Now}: Refresh()");
+
+        var refreshToken = Request.Cookies["RefreshToken"]
+            ?? throw new SecurityException("RefreshToken was not found in headers of the request.");
+        var command = new RefreshCommand(refreshToken);
+        var tokens = await mediator.Send(command);
+
+        AppendSecureCookie("AccessToken", tokens.AccessToken, tokens.AccessTokenExpiration);
+        AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
+
+        return Ok("User registered successfully");
     }
 
     [Authorize]
     [HttpGet("claims")]
     public async Task<IActionResult> GetClaims()
     {
-        try
+        logger.LogInformation($"{DateTime.Now}: GetClaims()");
+        var query = new GetClaimsQuery(Request.Cookies["AccessToken"]);
+        var result = await mediator.Send(query);
+        return Ok(result);
+    }
+
+    private void AppendSecureCookie(string key, string value, DateTime expiresDate)
+    {
+        var options = new CookieOptions
         {
-            var query = new GetClaimsQuery(Request.Cookies["jwt"] ?? "");
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch(UnauthorizedAccessException e)
-        {
-            return Unauthorized(new { message = e.Message });
-        }
-        catch (Exception e)
-        {
-            var errorResponse = new
-            {
-                title = "Internal Server Error",
-                message = $"An unexpected error occurred: '{e.Message}'."
-            };
-            return StatusCode(500, errorResponse);
-        }
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = expiresDate
+        };
+        Response.Cookies.Append(key, value, options);
     }
 }

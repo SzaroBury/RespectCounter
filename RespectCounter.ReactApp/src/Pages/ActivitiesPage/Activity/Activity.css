@@ -60,7 +60,7 @@
 .activity-actions {
     grid-column: 1/3;
     display: flex;
-    justify-content: space-between; /* Space between comments and reactions */
+    justify-content: space-between;
     align-items: center;
     margin-top: 10px;
 }
@@ -72,5 +72,5 @@
 }
 
 .activity-comments-button {
-    margin-right: auto; /* Ensure it stays on the left */
+    margin-right: auto; 
 }

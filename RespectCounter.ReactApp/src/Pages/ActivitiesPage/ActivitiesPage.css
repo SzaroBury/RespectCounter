@@ -44,10 +44,6 @@
     float: right;
 }
 
-.rating {
-    max-width: 100px;
-}
-
 .right {
     float: right;
     display: flex;

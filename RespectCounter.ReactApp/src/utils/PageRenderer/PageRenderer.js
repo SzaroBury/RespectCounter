@@ -1,18 +1,17 @@
 import "./PageRenderer.css";
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import HomePage from '../../Pages/HomePage/HomePage';
-import AboutPage from '../../Pages/AboutPage/AboutPage';
-import SignUpPage from '../../Pages/SignUpPage/SignUpPage';
-import ActivitiesPage from '../../Pages/ActivitiesPage/ActivitiesPage';
-import ActivityDetailsPage from '../../Pages/ActivitiesPage/ActivityDetailsPage/ActivityDetailsPage';
-import CreateActivityPage from "../../Pages/ActivitiesPage/CreateActivityPage/CreateActivityPage";
-import PersonsPage from '../../Pages/PersonsPage/PersonsPage';
-import CreatePersonPage from "../../Pages/PersonsPage/CreatePersonPage/CreatePersonPage";
-import PersonDetailsPage from "../../Pages/PersonsPage/PersonDetailsPage/PersonDetailsPage";
-import NotFoundPage from "../../Pages/NotFoundPage/NotFoundPage";
-import AdminPage from "../../Pages/AdminPage/AdminPage";
-
+import HomePage from '../../pages/HomePage/HomePage';
+import AboutPage from '../../pages/AboutPage/AboutPage';
+import SignUpPage from '../../pages/SignUpPage/SignUpPage';
+import ActivitiesPage from '../../pages/ActivitiesPage/ActivitiesPage';
+import ActivityDetailsPage from '../../pages/ActivitiesPage/ActivityDetailsPage/ActivityDetailsPage';
+import CreateActivityPage from "../../pages/ActivitiesPage/CreateActivityPage/CreateActivityPage";
+import PersonsPage from '../../pages/PersonsPage/PersonsPage';
+import CreatePersonPage from "../../pages/PersonsPage/CreatePersonPage/CreatePersonPage";
+import PersonDetailsPage from "../../pages/PersonsPage/PersonDetailsPage/PersonDetailsPage";
+import NotFoundPage from "../../pages/NotFoundPage/NotFoundPage";
+import AdminPage from "../../pages/AdminPage/AdminPage";
 
 const PageRenderer = () => {
     return (

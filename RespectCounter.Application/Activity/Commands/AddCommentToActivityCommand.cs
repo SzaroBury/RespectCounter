@@ -1,53 +1,47 @@
-using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
-namespace RespectCounter.Application.Commands
+namespace RespectCounter.Application.Commands;
+
+public record AddCommentToActivityCommand(string ActivityId, string Content, Guid UserId) : IRequest<Activity>;
+
+public class AddCommentToActivityCommandHandler : IRequestHandler<AddCommentToActivityCommand, Activity>
 {
-    public record AddCommentToActivityCommand(string ActivityId, string Content, ClaimsPrincipal User) : IRequest<Activity>;
+    private readonly IUnitOfWork uow;
 
-    public class AddCommentToActivityCommandHandler : IRequestHandler<AddCommentToActivityCommand, Activity>
+    public AddCommentToActivityCommandHandler(IUnitOfWork uow)
     {
-        private readonly IUnitOfWork uow;
+        this.uow = uow;
+    }
 
-        public AddCommentToActivityCommandHandler(IUnitOfWork uow)
-        {
-            this.uow = uow;
-        }
+    public async Task<Activity> Handle(AddCommentToActivityCommand request, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+        // DateTime now = DateTime.Now;
+        // Guid activityId;
+        // if(!Guid.TryParse(request.ActivityId, out activityId))  throw new ArgumentException("Invalid id format.");
 
-        public async Task<Activity> Handle(AddCommentToActivityCommand request, CancellationToken cancellationToken)
-        {
-            IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-            if(user == null) throw new SecurityException("Authentication issue. No user found.");
+        // Activity? targetActivity = await uow.Repository().FindByIdAsync<Activity>(activityId);
+        // if(targetActivity == null) throw new KeyNotFoundException("There is no activity object with the given id value.");
 
-            DateTime now = DateTime.Now;
-            Guid activityId;
-            if(!Guid.TryParse(request.ActivityId, out activityId))  throw new ArgumentException("Invalid id format.");
+        // Comment comment = new()
+        // {
+        //     PersonId = activityId,
+        //     Content = request.Content,
+            
+        //     Created = now,
+        //     CreatedById = request.UserId,
+        //     LastUpdated = now,
+        //     LastUpdatedById = request.UserId,
+        // };
+        // targetActivity.Comments.Add(comment);
+        // await uow.CommitAsync(cancellationToken);
 
-            Activity? targetActivity = await uow.Repository().GetById<Activity>(activityId);
-            if(targetActivity == null) throw new KeyNotFoundException("There is no activity object with the given id value.");
+        // //cleaning data before sending it to the client
+        // comment.CreatedBy = null;
+        // comment.LastUpdatedBy = null;
 
-            Comment comment = new Comment 
-            {
-                PersonId = activityId,
-                Content = request.Content,
-                
-                Created = now,
-                CreatedById = user.Id,
-                LastUpdated = now,
-                LastUpdatedById = user.Id,
-            };
-            targetActivity.Comments.Add(comment);
-            await uow.CommitAsync(cancellationToken);
-
-            //cleaning data before sending it to the client
-            comment.CreatedBy = null;
-            comment.LastUpdatedBy = null;
-
-            return targetActivity;
-        }
+        // return targetActivity;
     }
 }

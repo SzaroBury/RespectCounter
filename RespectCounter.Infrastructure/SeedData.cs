@@ -1,12 +1,14 @@
 ﻿using RespectCounter.Domain.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RespectCounter.Infrastructure.Identity;
 
 namespace RespectCounter.Infrastructure
 {
     internal static class SeedData
     {
-        private static IdentityUser? admin;
+        private static AppUser admin;
+        private static AppUser user;
 
         public static void Seed(ModelBuilder mb)
         {
@@ -36,7 +38,7 @@ namespace RespectCounter.Infrastructure
             Guid RLActivityComment = Guid.NewGuid();
             Guid RLActivityNegativeComment = Guid.NewGuid();
             Guid ADComment = Guid.NewGuid();
- 
+
             mb.Entity<Comment>().HasData(new List<Comment>
             {
                 CreateDummyComment(RLComment, "Najlepszy zawodnik!",                    perId: RL),
@@ -45,8 +47,8 @@ namespace RespectCounter.Infrastructure
                 CreateDummyComment(RLActivityComment, "Fajność!",                       actId: RLactivity),
                 CreateDummyComment(Guid.NewGuid(), "Zgadza się!",                       parentId: RLActivityComment),
                 CreateDummyComment(Guid.NewGuid(), "Też się zgadzam. Fajność!",         parentId: RLActivityComment),
-                CreateDummyComment(RLActivityNegativeComment, "Niefajność",             actId: RLactivity),             
-                CreateDummyComment(Guid.NewGuid(), "Nie zgadzam się. Fajność.",         parentId: RLActivityNegativeComment),             
+                CreateDummyComment(RLActivityNegativeComment, "Niefajność",             actId: RLactivity),
+                CreateDummyComment(Guid.NewGuid(), "Nie zgadzam się. Fajność.",         parentId: RLActivityNegativeComment),
                 CreateDummyComment(Guid.NewGuid(), "Lepsza weeeeeersja: https://www.youtube.com/watch?v=vmLonweq6wA", actId: RKactivity),
                 CreateDummyComment(ADComment, "Bardzo memiczna osoba",                  perId: AD),
                 CreateDummyComment(Guid.NewGuid(), "Hańba!",                            parentId : ADComment),
@@ -87,62 +89,86 @@ namespace RespectCounter.Infrastructure
                 new { TagsId = poTag, PersonsId = DT }
             );
             mb.Entity("ActivityHasTag").HasData(
-                new { TagsId = sportTag, ActivitiesId = RLactivity},
-                new { TagsId = footballTag, ActivitiesId = RLactivity},
-                new { TagsId = sportTag, ActivitiesId = RKactivity},
-                new { TagsId = f1Tag, ActivitiesId = RKactivity}
+                new { TagsId = sportTag, ActivitiesId = RLactivity },
+                new { TagsId = footballTag, ActivitiesId = RLactivity },
+                new { TagsId = sportTag, ActivitiesId = RKactivity },
+                new { TagsId = f1Tag, ActivitiesId = RKactivity }
             );
             mb.Entity<Reaction>().HasData(new List<Reaction>
             {
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Hate,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.NotUnderstand,  perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Dislike,        perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           perId: RL),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           actId: RLactivity),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.NotUnderstand,  actId: RLactivity),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           actId: RLactivity),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           actId: RLactivity),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           comId: RLComment),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,           comId: RLActivityComment),
-                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,           comId: RLActivityComment)
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Hate,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Dislike,       perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          perId: RL),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,          actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Dislike,       actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,          actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          actId: RLactivity),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          comId: RLComment),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Like,          comId: RLActivityComment),
+                CreateDummyReaction(Guid.NewGuid(), ReactionType.Love,          comId: RLActivityComment)
             });
         }
 
         private static void SeedIdentity(ModelBuilder mb)
-        { 
-            string adminRoleGuid = Guid.NewGuid().ToString();
-            string adminGuid = Guid.NewGuid().ToString();
+        {
+            Guid adminRoleId = Guid.NewGuid();
+            Guid userRoleId = Guid.NewGuid();
+            Guid adminId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
 
-            mb.Entity<IdentityRole>().HasData(new List<IdentityRole>
+            mb.Entity<IdentityRole<Guid>>().HasData(new List<IdentityRole<Guid>>
             {
-                new IdentityRole("Admin") { Id = adminRoleGuid },
-                new IdentityRole("User")
+                new("Admin") { Id = adminRoleId },
+                new("User") { Id = userRoleId }
             });
 
             // Seed sys user
-            var hasher = new PasswordHasher<IdentityUser>();
-            admin = new IdentityUser 
-            { 
-                Id = adminGuid, 
+            var hasher = new PasswordHasher<AppUser>();
+            admin = new AppUser
+            {
+                Id = adminId,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = "admin", 
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                UserName = "admin",
                 NormalizedUserName = "ADMIN",
                 Email = "admin@example.com",
                 NormalizedEmail = "ADMIN@EXAMPLE.COM",
-                // EmailConfirmed = true
+                EmailConfirmed = true
             };
             admin.PasswordHash = hasher.HashPassword(admin, "Admin123!");
-            mb.Entity<IdentityUser>().HasData(admin);
+            user = new AppUser
+            {
+                Id = userId,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                UserName = "user",
+                NormalizedUserName = "USER",
+                Email = "user@example.com",
+                NormalizedEmail = "USER@EXAMPLE.COM",
+                EmailConfirmed = true
+            };
+            user.PasswordHash = hasher.HashPassword(user, "User123!");
 
-            mb.Entity<IdentityUserRole<string>>().HasData(
-                new IdentityUserRole<string>()
+            mb.Entity<AppUser>().HasData(admin, user);
+
+            mb.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid>()
                 {
-                    UserId = adminGuid,
-                    RoleId = adminRoleGuid
+                    UserId = adminId,
+                    RoleId = adminRoleId
+                }
+            );
+            
+            mb.Entity<IdentityUserRole<Guid>>().HasData(
+                new IdentityUserRole<Guid>()
+                {
+                    UserId = userId,
+                    RoleId = userRoleId
                 }
             );
         }
@@ -160,9 +186,9 @@ namespace RespectCounter.Infrastructure
                 Status = status,
 
                 Created = DateTime.Now,
-                CreatedById = admin?.Id ?? "sys",
+                CreatedById = admin?.Id ?? Guid.Empty,
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = admin?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? Guid.Empty
             };
         }
         private static Tag CreateDummyTag(Guid id, string name, int level = 5, string desc = "Test desc")
@@ -176,9 +202,9 @@ namespace RespectCounter.Infrastructure
                 //Persons = null
 
                 Created = DateTime.Now,
-                CreatedById = admin?.Id ?? "sys",
+                CreatedById = admin?.Id ?? Guid.Empty,
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = admin?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? Guid.Empty
             };
         }
         private static Activity CreateDummyActivity(Guid id, Guid personId, string val, string loc, string desc, string source, DateTime? happend = null, ActivityType type = ActivityType.Quote, ActivityStatus status = ActivityStatus.NotVerified)
@@ -198,9 +224,9 @@ namespace RespectCounter.Infrastructure
                 //Comments
 
                 Created = DateTime.Now,
-                CreatedById = admin?.Id ?? "sys",
+                CreatedById = admin?.Id ?? Guid.Empty,
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = admin?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? Guid.Empty
             };
         }
         private static Comment CreateDummyComment(Guid id, string content, Guid? perId = null, Guid? actId = null, Guid? parentId = null) //, List<Reaction>? rea = null, List<Comment>? chil = null
@@ -216,9 +242,9 @@ namespace RespectCounter.Infrastructure
                 //Children = chil ?? new(),
 
                 Created = DateTime.Now,
-                CreatedById = admin?.Id ?? "sys",
+                CreatedById = admin?.Id ?? Guid.Empty,
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = admin?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? Guid.Empty
             };
         }
         private static Reaction CreateDummyReaction(Guid id, ReactionType type, Guid? perId = null, Guid? actId = null, Guid? comId = null)
@@ -232,9 +258,9 @@ namespace RespectCounter.Infrastructure
                 CommentId = comId,
 
                 Created = DateTime.Now,
-                CreatedById = admin?.Id ?? "sys",
+                CreatedById = admin?.Id ?? Guid.Empty,
                 LastUpdated = DateTime.Now,
-                LastUpdatedById = admin?.Id ?? "sys"
+                LastUpdatedById = admin?.Id ?? Guid.Empty
             };
         }   
     }

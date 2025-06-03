@@ -2,7 +2,8 @@ using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RespectCounter.API.Models;
+using RespectCounter.API.Mappers;
+using RespectCounter.API.Requests;
 using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
 using RespectCounter.Domain.Model;
@@ -13,7 +14,6 @@ namespace RespectCounter.API.Controllers;
 [Route("api/person")]
 public class PersonController: ControllerBase
 {
-
     private readonly ILogger<PersonController> logger;
     private readonly ISender mediator;
 
@@ -26,166 +26,76 @@ public class PersonController: ControllerBase
     #region Queries
     [HttpGet("/api/persons")]
     public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search = "", [FromQuery] string order = "")
-    {
-        var query = new GetVerifiedPersonsQuery
-        {
-            Search = search,
-            Order = order
-        };
+    {        
+        logger.LogInformation($"{DateTime.Now}: GetVerifiedPersons(search: '{search}', order: '{order}')");
+        var query = new GetVerifiedPersonsQuery(search, order, User);
         var result = await mediator.Send(query);
-
         return Ok(result);
     }
 
     [HttpGet("/api/persons/all")]
     public async Task<IActionResult> GetPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {
-        var query = new GetPersonsQuery(search, order);
+        logger.LogInformation($"{DateTime.Now}: GetPersons(search: '{search}', order: '{order}')");
+        var query = new GetPersonsQuery(search, order, User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
-
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPerson(string id)
     {
-        var query = new GetPersonByIdQuery(id);
-
-        try
-        {
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    [HttpGet("{id}/comments")]
-    public async Task<IActionResult> GetComments(string id, [FromQuery] int level = 2)
-    {
-        var query = new GetCommentsForPersonQuery(id, level);
-
-        try
-        {
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    [HttpGet("/api/persons/names")]
-    public async Task<IActionResult> GetSimplePersons([FromQuery] string search = "", [FromQuery] string order = "")
-    {
-        var query = new GetSimplePersonsQuery();
+        logger.LogInformation($"{DateTime.Now}: GetPerson(id: '{id}')");
+        var query = new GetPersonByIdQuery(id.ToGuid(), User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
-
         return Ok(result);
     }
 
-    [HttpGet("{id}/tags")]
-    public async Task<IActionResult> GetPersonTags(string id)
+    [HttpGet("/api/persons/names")]
+    public async Task<IActionResult> GetSimplePersons()
     {
-        var query = new GetPersonTagsQuery(id);
-
-        try
-        {
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
+        logger.LogInformation($"{DateTime.Now}: GetSimplePersons()");
+        var query = new GetSimplePersonsQuery();
+        var result = await mediator.Send(query);
+        return Ok(result);
     }
-
     #endregion
 
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposePerson([FromBody] ProposePersonModel newPerson)
+    [Authorize]
+    public async Task<IActionResult> ProposePerson(ProposePersonRequest newPerson)
     {
-        var command = new AddPersonCommand(
-            newPerson.FirstName, 
-            newPerson.LastName,
-            newPerson.NickName ?? "",
-            newPerson.Description ?? "", 
-            newPerson.Nationality, 
-            newPerson.Birthday, 
-            newPerson.DeathDate, 
-            newPerson.Tags,
-            User
-        );
-
-        try
-        {
-            var result = await mediator.Send(command);
-
-            return Ok(result);
-        }   
-        catch(ArgumentException e)
-        {
-            ModelState.AddModelError(e.ParamName ?? "??", e.Message);
-            return ValidationProblem(ModelState);
-        } 
-        catch(SecurityException)
-        {
-            return Unauthorized();
-        }
+        logger.LogInformation($"{DateTime.Now}: ProposePerson([ProposePersonRequest])");
+        AddPersonCommand command = newPerson.ToCommand(User.GetCurrentUserId());
+        var result = await mediator.Send(command);
+        return Ok(result);
     }
 
     [HttpPut("{id}/verify")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> VerifyPerson(string id)
     {
-        var command = new VerifyPersonCommand(){ Id = id };
-        Person result = await mediator.Send(command);
-
-        return Ok(result);
-    }
-
-    [Authorize]
-    [HttpPost("{id}/reaction/{reaction}")]
-    public async Task<IActionResult> ReactionToPerson(string id, int reaction)
-    {
-        var command = new AddReactionToPersonCommand(){ PersonId = id, ReactionType = reaction, User = User};
-        Person result = await mediator.Send(command);
-
-        return Ok(result);
-    }
-
-    [Authorize]
-    [HttpPost("{id}/comment")]
-    public async Task<IActionResult> CommentPerson(string id, [FromBody] string content)
-    {
-        var command = new AddCommentToPersonCommand(){ PersonId = id, Content = content, User = User};
-        Person result = await mediator.Send(command);
-
-        return Ok(result);;
-    }
-
-    [Authorize]
-    [HttpPost("{id}/tag/{tag}")]
-    public async Task<IActionResult> TagPerson(string id, string tag)
-    {
-        var command = new AddTagToPersonCommand(){ PersonId = id, TagName = tag, User = User};
+        logger.LogInformation($"{DateTime.Now}: VerifyPerson(id: '{id}')");
+        var command = new VerifyPersonCommand(id.ToGuid());
         Person result = await mediator.Send(command);
 
         return Ok(result);
     }
 
     [HttpPut("{id}")]
-    public Task<IActionResult> ProposeUpdatePerson(string id, [FromBody] Person person)
+    [Authorize(Roles = "Admin")]
+    public Task<IActionResult> ProposeUpdatePerson(string id, Person person)
     {
+        logger.LogInformation($"{DateTime.Now}: ProposeUpdatePerson(id: '{id}', [Person])");
         throw new NotImplementedException();
     }
 
     [HttpPut("{id}/hide")]
+    [Authorize(Roles = "Admin")]
     public Task<IActionResult> HidePerson(string id)
     {
+        logger.LogInformation($"{DateTime.Now}: HidePerson(id: '{id}')");
         throw new NotImplementedException();
     }
     #endregion

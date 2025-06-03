@@ -1,8 +1,7 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Queries
 {
@@ -19,11 +18,12 @@ namespace RespectCounter.Application.Queries
 
         public async Task<List<SimplePersonDTO>> Handle(GetSimplePersonsQuery request, CancellationToken cancellationToken)
         {
-            var persons = await uow.Repository()
-                                .FindQueryable<Person>(p => p.Status != PersonStatus.Hidden)
-                                .Select(p => p.ToSimpleDTO())
-                                .ToListAsync(cancellationToken);
-            return persons;
+            throw new NotImplementedException();
+            // var persons = await uow.Repository()
+            //                     .FindQueryable<Person>(p => p.Status != PersonStatus.Hidden)
+            //                     .Select(p => p.ToSimpleDTO())
+            //                     .ToListAsync(cancellationToken);
+            // return persons;
         }
     }
 }

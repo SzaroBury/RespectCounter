@@ -81,3 +81,4 @@ Planned improvements and features:
 - Implement pagination
 - Add support for user avatars and images for public figures and activities
 - Introduce a reporting system for activities and comments
+- Use Logger

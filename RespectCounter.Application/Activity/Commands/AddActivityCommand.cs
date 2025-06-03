@@ -1,11 +1,8 @@
 using System.Globalization;
-using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands;
 
@@ -18,7 +15,7 @@ public record AddActivityCommand(
     string Source, 
     int Type, 
     string Tags,
-    ClaimsPrincipal User
+    Guid UserId
 ) : IRequest<ActivityDTO>;
 
 public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, ActivityDTO>
@@ -32,18 +29,22 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
 
     public async Task<ActivityDTO> Handle(AddActivityCommand request, CancellationToken cancellationToken)
     {
+        var newActivity = CreateActivity(request, request.UserId);
+        await AddTagsToActivity(request.Tags, newActivity);
+        await SaveActivity(newActivity, cancellationToken);
+        return newActivity.ToDTO(request.UserId);
+    }
+
+    public Activity CreateActivity(AddActivityCommand request, Guid userId)
+    {
         DateTime now = DateTime.Now;
         Guid newId = Guid.NewGuid();
         DateTime? happend = null;
-
-        IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-        if(user == null) throw new SecurityException("Authentication issue. No user found.");
 
         if(!string.IsNullOrEmpty(request.Happend))
         {
             if(!DateTime.TryParseExact(request.Happend, "yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
-            
                 throw new ArgumentException("Invalid date format. Expected format: yyyy-MM-ddTHH:mm:ss.fffZ", "Happend");
             }
             happend = parsedDate;
@@ -55,22 +56,6 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
             throw new ArgumentException("Invalid Type value. Expected value: 1 or 2.", "Type");
         }
 
-        Activity? newActivity = new Activity
-        {
-            Id = newId,
-            Value = request.Value,
-            Location = request.Location,
-            Description = request.Description,
-            Source = request.Source,
-            Type = type,
-            Happend = happend,
-
-            Created = now,
-            CreatedById = user.Id,
-            LastUpdated = now,
-            LastUpdatedById = user.Id
-        };
-
         if(!Guid.TryParse(request.Person, out Guid personGuid))
         {
             throw new ArgumentException($"Invalid person guid format: '{request.Person}'", "Person");
@@ -81,33 +66,52 @@ public class AddActivityCommandHandler : IRequestHandler<AddActivityCommand, Act
         {
             throw new ArgumentException($"Person with given id was not found: '{request.Person}'", "Person");
         }
-        newActivity.Person = person;
 
-        List<string> tags = request.Tags.Split(",").ToList();
-        foreach(string tag in tags)
+        return new Activity
         {
-            Tag? existingTag = uow.Repository().FindQueryable<Tag>(t => t.Name.ToLower() == tag.ToLower()).FirstOrDefault();
-            if(existingTag == null)
+            Id = newId,
+            Value = request.Value,
+            Location = request.Location,
+            Description = request.Description,
+            Source = request.Source,
+            Type = type,
+            Happend = happend,
+            Person = person,
+
+            Created = now,
+            CreatedById = userId,
+            LastUpdated = now,
+            LastUpdatedById = userId
+        };
+    }
+
+    private async Task AddTagsToActivity(string tagsString, Activity newActivity)
+    {
+        List<string> tags = tagsString.Split(",").ToList();
+        foreach (string tag in tags)
+        {
+            Tag? existingTag = await uow.Repository().SingleOrDefaultAsync<Tag>(t => t.Name.ToLower() == tag.ToLower());
+            if (existingTag == null)
             {
-                Tag newTag = new Tag 
+                Tag newTag = new Tag
                 {
                     Name = tag,
-                    Description = $"Created with '{newId}' activity object.",
+                    Description = $"Created with '{newActivity.Id}' activity object.",
                     Level = 5,
-                    
-                    Created = now,
-                    CreatedById = "sys",
-                    LastUpdated = now,
-                    LastUpdatedById = "sys"
+                    Created = DateTime.Now,
+                    CreatedById = Guid.Empty,
+                    LastUpdated = DateTime.Now,
+                    LastUpdatedById = Guid.Empty
                 };
                 existingTag = uow.Repository().Add(newTag);
             }
             newActivity.Tags.Add(existingTag);
         }
-        var added = uow.Repository().Add(newActivity);
-        await uow.CommitAsync(cancellationToken);
+    }
 
-        if(added != null) return added.ToDTO();
-        else throw new Exception("Unknown error during saving.");
+    private async Task SaveActivity(Activity newActivity, CancellationToken cancellationToken)
+    {
+        uow.Repository().Add(newActivity);
+        await uow.CommitAsync(cancellationToken);
     }
 }

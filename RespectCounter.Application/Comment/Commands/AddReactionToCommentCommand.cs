@@ -1,58 +1,61 @@
 using System.Security;
-using System.Security.Claims;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using RespectCounter.Domain.Model;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Application.Commands
 {
-    public record AddReactionToCommentCommand(string CommentId, int ReactionType, ClaimsPrincipal User) : IRequest<Comment>;
+    public record AddReactionToCommentCommand(Guid CommentId, int ReactionType, Guid UserId) : IRequest<int>;
 
-    public class AddReactionToCommentCommandHandler : IRequestHandler<AddReactionToCommentCommand, Comment>
+    public class AddReactionToCommentCommandHandler : IRequestHandler<AddReactionToCommentCommand, int>
     {
         private readonly IUnitOfWork uow;
+        private readonly IUserService userService;
 
-        public AddReactionToCommentCommandHandler(IUnitOfWork uow)
+        public AddReactionToCommentCommandHandler(IUnitOfWork uow, IUserService userService)
         {
             this.uow = uow;
+            this.userService = userService;
         }
 
-        public async Task<Comment> Handle(AddReactionToCommentCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(AddReactionToCommentCommand request, CancellationToken cancellationToken)
         {
-            IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-            if(user == null) throw new SecurityException("Authentication issue. No user found.");
+            User? user = await userService.GetByIdAsync(request.UserId)
+                ?? throw new SecurityException("Authentication issue. No user found.");
 
             DateTime now = DateTime.Now;
-            Guid commentId;
-            if(!Guid.TryParse(request.CommentId, out commentId))  throw new ArgumentException("Invalid id format.");
 
-            Comment? targetComment = await uow.Repository().GetById<Comment>(commentId);
+            Comment? targetComment = await uow.Repository().SingleOrDefaultAsync<Comment>(c => c.Id == request.CommentId, "Reactions");
             if(targetComment == null) throw new KeyNotFoundException("There is no comment with the given id value.");
 
-            Reaction? reaction = uow.Repository().FindQueryable<Reaction>(r => r.CommentId == commentId && r.CreatedById == user.Id).FirstOrDefault();
-            if(reaction != null) throw new InvalidOperationException("This user has already reacted to this comment.");
-
             if(!Enum.IsDefined(typeof(ReactionType), request.ReactionType)) throw new ArgumentException("Invalid format of the reaction type.");
-
-            reaction = new Reaction 
+            
+            Reaction? reaction = uow.Repository().FindQueryable<Reaction>(r => r.CommentId == request.CommentId && r.CreatedById == user.Id).FirstOrDefault();
+            if(reaction != null)
             {
-                CommentId = commentId,
-                ReactionType = (ReactionType) request.ReactionType,
-                
-                Created = now,
-                CreatedById = user.Id,
-                LastUpdated = now,
-                LastUpdatedById = user.Id,
-            };
-            targetComment.Reactions.Add(reaction);
+                //throw new InvalidOperationException("This user has already reacted to this comment.");
+                reaction.ReactionType = (ReactionType) request.ReactionType;
+                reaction.LastUpdated = now;
+                uow.Repository().Update(reaction);
+            }
+            else
+            {
+                reaction = new Reaction 
+                {
+                    CommentId = request.CommentId,
+                    ReactionType = (ReactionType) request.ReactionType,
+                    
+                    Created = now,
+                    CreatedById = user.Id,
+                    LastUpdated = now,
+                    LastUpdatedById = user.Id,
+                };
+                targetComment.Reactions.Add(reaction);
+            }
+
             await uow.CommitAsync(cancellationToken);
 
-            //cleaning data before sending it to the client
-            reaction.CreatedBy = null;
-            reaction.LastUpdatedBy = null;
-
-            return targetComment;
+            return RespectService.CountRespect(targetComment.Reactions);
         }
     }
 }

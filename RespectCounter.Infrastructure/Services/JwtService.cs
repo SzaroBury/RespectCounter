@@ -1,57 +1,68 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using RespectCounter.Domain.Interfaces;
+using RespectCounter.Application.Common;
+using RespectCounter.Domain.Contracts;
+using RespectCounter.Domain.Model;
 
 namespace RespectCounter.Infrastructure.Services;
 
-public class JwtService: IJwtService
+public class JwtService : IJwtService
 {
-    private readonly IConfiguration config;
+    private readonly JwtSettings jwtSettings;
 
-    public JwtService(IConfiguration config)
+    public JwtService(IOptions<JwtSettings> jwtSettings)
     {
-        this.config = config;
+        this.jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateToken(IdentityUser user, IList<string>? roles = null)
+    public (string accessToken, DateTime accessTokenExpiration) GenerateAccessToken(User user, IEnumerable<string>? roles = null)
     {
-        if(user == null || user.UserName == null || user.Email == null)
-        {
-            throw new NullReferenceException("User cannot be null.");
-        }
-
-        var key = config["Jwt:Key"];
-        if(key == null)
-        {
-            throw new NullReferenceException("JWT key cannot be null.");
-        }
+        var secret = jwtSettings.AccessTokenSecret
+            ?? throw new NullReferenceException("JWT secret cannot be null.");
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Username),
         };
 
-        if(roles != null) 
+        if (roles != null)
         {
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
         }
 
-        var encodedKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+        var encodedKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(encodedKey, SecurityAlgorithms.HmacSha256Signature);
 
         var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"],
+            issuer: jwtSettings.Issuer,
+            audience: jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(config["Jwt:ExpireMinutes"])),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings.AccessTokenExpirationMinutes)),
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        string accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+        DateTime accessTokenExpiration = DateTime.Now.AddMinutes(jwtSettings.AccessTokenExpirationMinutes);
+
+        return (accessToken, accessTokenExpiration);
+    }
+
+    public (string refreshToken, DateTime refreshTokenExpiration) GenerateRefreshToken(int size = 32)
+    {
+        var randomNumber = new byte[size];
+
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+
+        var guid = Guid.NewGuid().ToString("N");
+
+        var refreshToken = $"{Convert.ToBase64String(randomNumber)}.{guid}";
+        var refreshTokenExpiration = DateTime.Now.AddDays(jwtSettings.RefreshTokenExpirationDays);
+
+        return new (refreshToken, refreshTokenExpiration);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace RespectCounter.Domain.Interfaces;
+﻿namespace RespectCounter.Domain.Contracts;
 
 public interface IEntity
 {

@@ -1,10 +1,14 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RespectCounter.Application.Queries;
-using RespectCounter.Application.Commands;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
+using MediatR;
+
 using RespectCounter.Domain.Model;
-using RespectCounter.API.Models;
-using System.Security;
+using RespectCounter.Application.Commands;
+using RespectCounter.Application.Queries;
+using RespectCounter.API.Requests;
+using RespectCounter.API.Mappers;
 
 namespace RespectCounter.API.Controllers;
 
@@ -25,8 +29,8 @@ public class ActivityController: ControllerBase
     [HttpGet("/api/activities/all")]
     public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
     {
-        Console.WriteLine($"GetActivities(search = '{search}', order = '{order}', tags = '{tags}')");
-        var query = new GetActivitesQuery(search, order, tags);
+        logger.LogInformation($"{DateTime.Now}: GetActivities(search = '{search}', order = '{order}', tags = '{tags}')");
+        var query = new GetActivitiesQuery(search, order, tags, User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
 
         return Ok(result);
@@ -35,8 +39,9 @@ public class ActivityController: ControllerBase
     [HttpGet("/api/activities")]
     public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
     {
-        Console.WriteLine($"GetVerifiedActivities(search = '{search}', order = '{order}', tags = '{tags}')");
-        var query = new GetActivitesQuery(search, order, tags, [ActivityStatus.Verified]);
+        logger.LogInformation($"{DateTime.Now}: GetVerifiedActivities(search = '{search}', order = '{order}', tags = '{tags}')");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "??";
+        var query = new GetActivitiesQuery(search, order, tags, userId.ToNullableGuid(), [ActivityStatus.Verified]);
         var result = await mediator.Send(query);
 
         return Ok(result);
@@ -45,123 +50,50 @@ public class ActivityController: ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetActivity(string id)
     {
-        var query = new GetActivityByIdQuery(id);
+        logger.LogInformation($"{DateTime.Now}: GetActivity(id = '{id})");
 
-        try
-        {
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    [HttpGet("{id}/comments")]
-    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2)
-    {
-        var query = new GetCommentsForActivityQuery(id, level);
-
-        try
-        {
-            var result = await mediator.Send(query);
-            return Ok(result);
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
+        var query = new GetActivityByIdQuery(id, User.TryGetCurrentUserId());
+        var result = await mediator.Send(query);
+        return Ok(result);
     }
     #endregion
     
     #region Commands
     [HttpPost]
-    public async Task<IActionResult> ProposeActivity([FromBody] ProposeActivityModel newActivity)
+    [Authorize]
+    public async Task<IActionResult> ProposeActivity(ProposeActivityRequest newActivity)
     {
-        var command = new AddActivityCommand(
-            newActivity.PersonId, 
-            newActivity.Title, 
-            newActivity.Description ?? "", 
-            newActivity.Location ?? "", 
-            newActivity.Happend ?? "", 
-            newActivity.Source, 
-            newActivity.Type, 
-            newActivity.Tags,
-            User
-            );
-
-        try
-        {
-            var result = await mediator.Send(command);
-
-            return Ok(result);
-        }   
-        catch(ArgumentException e)
-        {
-            ModelState.AddModelError(e.ParamName ?? "??", e.Message);
-            return ValidationProblem(ModelState);
-        } 
-        catch(SecurityException)
-        {
-            return Unauthorized();
-        }
+        logger.LogInformation($"{DateTime.Now}: ProposeActivity([ProposeActivityRequest])");
+        var currentUserId = User.GetCurrentUserId(); 
+        var command = newActivity.ToCommand(currentUserId);
+        var result = await mediator.Send(command);
+        return Ok(result);
     }
 
     [HttpPut("{id}/verify")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> VerifyActivity(string id)
     {
-        var command = new VerifyActivityCommand(id);
-        Activity result = await mediator.Send(command);
-
-        return Ok(result);
-    }
-
-    [HttpPost("{id}/reaction/{reaction}")]
-    public async Task<IActionResult> ReactionToActivity(string id, int reaction)
-    {
-        var command = new AddReactionToActivityCommand(id, reaction, User);
-        Activity result = await mediator.Send(command);
-
-        return Ok(result);
-    }
-
-    [HttpPost("{id}/comment")]
-    public async Task<IActionResult> CommentActivity(string id, [FromBody] string content)
-    {
-        var command = new AddCommentToActivityCommand(id, content, User);
-
-        try
-        {
-            Activity result = await mediator.Send(command);
-            
-            return Ok(result);
-        }
-        catch(SecurityException)
-        {
-            return Unauthorized();
-        }
-
-    }
-
-    [HttpPost("{id}/tag/{tag}")]
-    public async Task<IActionResult> TagActivity(string id, string tag)
-    {
-        var command = new AddTagToActivityCommand(id, tag, User);
+        logger.LogInformation($"{DateTime.Now}: VerifyActivity(id: '{id}')");
+        var command = new VerifyActivityCommand(id.ToGuid());
         Activity result = await mediator.Send(command);
 
         return Ok(result);
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public Task<IActionResult> ProposeUpdateActivity(string id, [FromBody] Activity activity)
     {
+        logger.LogInformation($"{DateTime.Now}: ProposeUpdateActivity(id: '{id}', [Activity])");
         throw new NotImplementedException();
     }
 
     [HttpPut("{id}/hide")]
+    [Authorize(Roles = "Admin")]
     public Task<IActionResult> HideActivity(string id)
     {
+        logger.LogInformation($"{DateTime.Now}: HideActivity(id: '{id}')");
         throw new NotImplementedException();
     }
     #endregion

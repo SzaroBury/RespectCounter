@@ -1,8 +1,12 @@
+import "./ReactionButtons.css";
 import axios from "axios";
 import { useAuth } from "../../utils/AuthProvider/AuthProvider";
+import { useEffect, useState } from "react";
 
-function ReactionButtons({respect, targetActivityId = "", targetPersonId = "", targetParentId = ""}) {
+function ReactionButtons({respect, reaction, targetActivityId = "", targetPersonId = "", targetParentId = ""}) {
     const {isLoggedIn, logout, openLoginPopup} = useAuth();
+    const [displayedRespect, setDisplayedRespect] = useState(respect);
+    const [clickedReaction, setClickedReaction] = useState(reaction);
     let targetUrl = "";
 
     if (targetActivityId !== "") 
@@ -24,10 +28,13 @@ function ReactionButtons({respect, targetActivityId = "", targetPersonId = "", t
             openLoginPopup();
             return;
         }
+        // to do: if reaction === clickedReaction -> remove reaction
 
         try {
             console.log('ReactionButtons: sending reaction request:', reaction);
             const response = await axios.post(targetUrl + reaction.toString() );
+            setDisplayedRespect(response.data);
+            setClickedReaction(reaction);
             console.log('ReactionButtons: success ', response.data);
         } catch (error) {
             if (error.response && error.response.status === 401) {
@@ -40,22 +47,33 @@ function ReactionButtons({respect, targetActivityId = "", targetPersonId = "", t
         }
     };
 
+    useEffect(() => {
+        if(!isLoggedIn) {
+            setClickedReaction(-1);
+        };
+    }, [isLoggedIn]);
+
+    useEffect(() => {
+        console.log(reaction);
+        setClickedReaction(reaction)
+    }, []);
+
     return (
         <div className="input-group">
-            <button className='btn btn-outline-primary' onClick={() => handleClick(1)}>
+            <button className={'btn btn-outline-primary ' + (clickedReaction === 0 ? 'active': '')} onClick={() => handleClick(0)}>
                 <i className="bi bi-hand-thumbs-down-fill"></i>
                 <i className="bi bi-hand-thumbs-down-fill"></i>
             </button>
-            <button className='btn btn-outline-primary' onClick={() => handleClick(2)}>
+            <button className={'btn btn-outline-primary ' + (clickedReaction === 1 ? 'active': '')} onClick={() => handleClick(1)}>
                 <i className="bi bi-hand-thumbs-down-fill"></i>
             </button>
-            <span className='rating form-control text-center'>
-                {respect}
+            <span className='form-control text-center reaction-buttons-rating'>
+                {displayedRespect}
             </span>
-            <button className='btn btn-outline-primary' onClick={() => handleClick(3)}>
+            <button className={'btn btn-outline-primary ' + (clickedReaction === 2 ? 'active': '')} onClick={() => handleClick(2)}>
                 <i className="bi bi-hand-thumbs-up-fill"></i>
             </button>
-            <button className='btn btn-outline-primary' onClick={() => handleClick(4)}>
+            <button className={'btn btn-outline-primary ' + (clickedReaction === 3 ? 'active': '')} onClick={() => handleClick(3)}>
                 <i className="bi bi-hand-thumbs-up-fill"></i>
                 <i className="bi bi-hand-thumbs-up-fill"></i>
             </button>

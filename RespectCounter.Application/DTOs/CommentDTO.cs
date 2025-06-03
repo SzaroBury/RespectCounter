@@ -1,3 +1,5 @@
+using RespectCounter.Domain.Model;
+
 namespace RespectCounter.Application.DTOs;
 
 public record CommentDTO(
@@ -12,5 +14,6 @@ public record CommentDTO(
     int Status,
     int Respect,
     int ChildrenCount,
-    List<CommentDTO> Children
+    List<CommentDTO> Children,
+    ReactionType? CurrentUsersReaction
 );
