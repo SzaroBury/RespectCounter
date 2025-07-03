@@ -28,7 +28,7 @@ public class PersonController: ControllerBase
     public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {        
         logger.LogInformation($"{DateTime.Now}: GetVerifiedPersons(search: '{search}', order: '{order}')");
-        var query = new GetVerifiedPersonsQuery(search, order, User);
+        var query = new GetVerifiedPersonsQuery(search, order.ToPersonSortByEnum(), User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
         return Ok(result);
     }
@@ -37,7 +37,7 @@ public class PersonController: ControllerBase
     public async Task<IActionResult> GetPersons([FromQuery] string search = "", [FromQuery] string order = "")
     {
         logger.LogInformation($"{DateTime.Now}: GetPersons(search: '{search}', order: '{order}')");
-        var query = new GetPersonsQuery(search, order, User.TryGetCurrentUserId());
+        var query = new GetPersonsQuery(search, order.ToPersonSortByEnum(), User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
         return Ok(result);
     }
@@ -78,7 +78,7 @@ public class PersonController: ControllerBase
     {
         logger.LogInformation($"{DateTime.Now}: VerifyPerson(id: '{id}')");
         var command = new VerifyPersonCommand(id.ToGuid());
-        Person result = await mediator.Send(command);
+        var result = await mediator.Send(command);
 
         return Ok(result);
     }

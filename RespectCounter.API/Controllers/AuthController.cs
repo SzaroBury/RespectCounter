@@ -2,6 +2,7 @@ using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RespectCounter.API.Mappers;
 using RespectCounter.API.Requests;
 using RespectCounter.Application.Commands;
 using RespectCounter.Application.Queries;
@@ -22,19 +23,6 @@ public class AuthController : ControllerBase
         this.mediator = mediator;
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(LoginRequest request)
-    {
-        logger.LogInformation($"{DateTime.Now}: Login([LoginRequest])");
-
-        var command = new LoginCommand(request.Username, request.Password);
-        var tokens = await mediator.Send(command);
-
-        AppendSecureCookie("AccessToken", tokens.AccessToken, tokens.AccessTokenExpiration);
-        AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
-        return Ok("Login successful");
-    }
-
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(RegisterRequest request)
     {
@@ -47,6 +35,40 @@ public class AuthController : ControllerBase
         AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
 
         return Ok("Tokens refreshed successfully");
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginAsync(LoginRequest request)
+    {
+        logger.LogInformation($"{DateTime.Now}: Login([LoginRequest])");
+
+        var command = new LoginCommand(request.Username, request.Password);
+        var tokens = await mediator.Send(command);
+
+        AppendSecureCookie("AccessToken", tokens.AccessToken, tokens.AccessTokenExpiration);
+        AppendSecureCookie("RefreshToken", tokens.RefreshToken, tokens.RefreshTokenExpiration);
+
+        var userClaims = new
+        {
+            UserName = User.Identity?.Name,
+            User.Identity?.IsAuthenticated,
+            Claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList()
+        };
+        return Ok(userClaims);
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        logger.LogInformation($"{DateTime.Now}: Logout()");
+
+        var command = new LogoutCommand(User.GetCurrentUserId());
+        await mediator.Send(command);
+        Response.Cookies.Delete("AccessToken");
+        Response.Cookies.Delete("RefreshToken");
+
+        return Ok("Logout successful");
     }
 
     [HttpPost("refresh")]
@@ -65,14 +87,18 @@ public class AuthController : ControllerBase
         return Ok("User registered successfully");
     }
 
-    [Authorize]
     [HttpGet("claims")]
+    [Authorize]
     public async Task<IActionResult> GetClaims()
     {
         logger.LogInformation($"{DateTime.Now}: GetClaims()");
-        var query = new GetClaimsQuery(Request.Cookies["AccessToken"]);
-        var result = await mediator.Send(query);
-        return Ok(result);
+        var userClaims = new
+        {
+            UserName = User.Identity?.Name,
+            User.Identity?.IsAuthenticated,
+            Claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList()
+        };
+        return Ok(await Task.FromResult(userClaims));
     }
 
     private void AppendSecureCookie(string key, string value, DateTime expiresDate)

@@ -1,3 +1,17 @@
 .home-page {
     grid-column: 2 / 3;
 }
+
+.home-sections {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.home-section {
+    flex: 1 1 0;
+    background: #f8f9fa;
+    padding: 2rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}

@@ -3,56 +3,64 @@ using RespectCounter.Domain.Contracts;
 using RespectCounter.Domain.Model;
 using RespectCounter.Application.DTOs;
 using System.Security.Claims;
+using RespectCounter.Application.Common;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetVerifiedPersonsQuery(string Search, string Order, ClaimsPrincipal? User) : IRequest<IEnumerable<PersonDTO>>;
+    public record GetVerifiedPersonsQuery(string Search, PersonSortBy Order, Guid? UserId) : IRequest<IEnumerable<PersonDTO>>;
 
     // to do: to find better solution for searching terms (contains is like "LIKE '%searchterm%'", so it is not an optimal solution)
     public class GetVerifiedPersonsQueryHandler : IRequestHandler<GetVerifiedPersonsQuery, IEnumerable<PersonDTO>>
     {
         private readonly IUnitOfWork uow;
+        private readonly IUserService userService;
 
-        public GetVerifiedPersonsQueryHandler(IUnitOfWork uow)
+        public GetVerifiedPersonsQueryHandler(IUnitOfWork uow, IUserService userService)
         {
             this.uow = uow;
+            this.userService = userService;
         }
 
         public async Task<IEnumerable<PersonDTO>> Handle(GetVerifiedPersonsQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        //     string? userGuid = null;
-        //     if(request.User != null)
-        //     {
-        //         IdentityUser? user = await uow.UserManager.GetUserAsync(request.User);
-        //         userGuid = user?.Id.ToString();
-        //     }
+            Guid? userId = null;
+            if (request.UserId.HasValue)
+            {
+                var user = await userService.GetByIdAsync(request.UserId.Value);
+                userId = user.Id;
+            }
 
-        //     IQueryable<Person> persons;
-        //     if(string.IsNullOrEmpty(request.Search))
-        //     {
-        //         persons = uow.Repository().FindQueryable<Person>(p => p.Status == PersonStatus.Verified);
-        //     }
-        //     else
-        //     {
-        //         var search = request.Search.ToLower();
-        //         persons = uow.Repository().FindQueryable<Person>(
-        //             p => p.Status == PersonStatus.Verified
-        //                 && ( p.FirstName.ToLower().Contains(search)
-        //                     || p.LastName.ToLower().Contains(search)
-        //                     || p.Nationality.ToLower().Contains(search)
-        //                     || p.Description.ToLower().Contains(search)
-        //                     || p.Tags.Any(t => t.Name.ToLower().Contains(search))
-        //                 )
-        //         );
-        //     }
+            IQueryable<Person> query = uow.Repository().FindQueryable<Person>(p => p.Status == PersonStatus.Verified);
+            if(!string.IsNullOrEmpty(request.Search))
+            {
+                var search = request.Search.ToLower();
+                query = query.Where(
+                    p => p.FirstName.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                        || p.LastName.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                        || p.Nationality.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                        || p.Description.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                        || p.Tags.Any(t => t.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase))
 
-        //     var token = uow.JwtService.GenerateAccessToken;
+                );
+            }
+
+            var orderedQuery = query.ApplySorting(request.Order);
+
+            var persons = await uow.Repository()
+                .FindListAsync(
+                    orderedQuery,
+                    ["Comments.Children", "Reactions", "Tags"],
+                    null,
+                    cancellationToken
+                );
+
+            foreach (var person in persons)
+            {
+                person.CreatedBy = await userService.GetByIdAsync(person.CreatedById);
+            }
             
-        //     var included = persons.Include(p => p.Tags).Include(p => p.Reactions).Include(p => p.CreatedBy);
-            
-        //     var ordered = await RespectService.OrderPersonsAsync(included, request.Order);
-        //     return ordered.Select(p => p.ToDTO(userGuid)).ToList();
+            return persons.Select(p => p.ToDTO(userId));
         }
     }
 }

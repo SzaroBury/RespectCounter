@@ -2,6 +2,7 @@
     position: fixed;
     top: calc(var(--rc-header-height) - 1px);
     right: var(--rc-rigth-margin);
+    min-width: 250px;
     padding: 1rem;
     padding-top: 50px;
     background-color: var(--bs-secondary-bg);
@@ -10,10 +11,6 @@
     border-bottom-right-radius: 20px;
     width: 235px;
     min-height: 800px;
-}
-
-.tag-item {
-    padding-left: 30px;
 }
 
 .selected-tag {

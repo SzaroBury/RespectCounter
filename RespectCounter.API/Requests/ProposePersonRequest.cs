@@ -4,8 +4,9 @@ public record ProposePersonRequest(
     string FirstName, 
     string LastName, 
     string? NickName,
+    string Profession,
     string? Description, 
-    string Nationality, 
+    string Nationality,
     string? Birthday, 
     string? DeathDate, 
     string Tags

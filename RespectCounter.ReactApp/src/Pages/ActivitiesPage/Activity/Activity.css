@@ -7,6 +7,14 @@
     background-color: var(--bs-secondary-bg);
 }
 
+.activity-quote {
+    box-shadow: 0 4px 8px rgba(0, 255, 255, 0.3);
+}
+
+.activity-act {
+    box-shadow: 0 4px 8px rgba(255, 255, 0, 0.3);
+}
+
 .activity-header {
     display: flex;
     align-items: start;

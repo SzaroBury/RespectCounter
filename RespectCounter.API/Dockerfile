@@ -17,4 +17,6 @@ RUN dotnet publish "RespectCounter.API.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "RespectCounter.API.dll"]
+COPY ../wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+CMD ["dotnet", "RespectCounter.API.dll"]

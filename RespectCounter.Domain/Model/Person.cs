@@ -7,6 +7,7 @@ public class Person : Entity, IReactionable
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string NickName { get; set; } = string.Empty;
+    public string Profession { get; set; } = "Unknown";
     public string Description { get; set; } = string.Empty;
     public string Nationality { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; } 

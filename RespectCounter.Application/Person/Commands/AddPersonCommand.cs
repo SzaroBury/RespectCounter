@@ -3,6 +3,7 @@ using MediatR;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 using RespectCounter.Domain.Contracts;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Commands;
 
@@ -10,6 +11,7 @@ public record AddPersonCommand(
     string FirstName, 
     string LastName, 
     string NickName,
+    string Profession,
     string Description, 
     string Nationality, 
     DateTime? Birthday, 
@@ -43,6 +45,7 @@ public class AddPersonCommandHandler : IRequestHandler<AddPersonCommand, PersonD
             FirstName = request.FirstName,
             LastName = request.LastName,
             NickName = request.NickName,
+            Profession = request.Profession,
             Description = request.Description,
             Nationality = request.Nationality,
             Birthday = birthday,

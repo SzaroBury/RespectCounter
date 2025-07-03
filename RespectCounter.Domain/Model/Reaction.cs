@@ -14,8 +14,8 @@ public class Reaction : Entity
 
 public enum ReactionType
 {
-    Hate,
-    Dislike,
-    Like,
-    Love
+    Hate = -2,
+    Dislike = -1,
+    Like = 1,
+    Love = 2
 }

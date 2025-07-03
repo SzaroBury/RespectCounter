@@ -6,6 +6,7 @@ public record CommentDTO(
     string Id, 
     string CreatedBy,
     string CreatedById,
+    string AvatarUrl,
     string Created,
     string Content, 
     string ActivityId,

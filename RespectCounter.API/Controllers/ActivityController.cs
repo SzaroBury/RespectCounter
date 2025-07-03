@@ -30,7 +30,7 @@ public class ActivityController: ControllerBase
     public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
     {
         logger.LogInformation($"{DateTime.Now}: GetActivities(search = '{search}', order = '{order}', tags = '{tags}')");
-        var query = new GetActivitiesQuery(search, order, tags, User.TryGetCurrentUserId());
+        var query = new GetActivitiesQuery(search, order.ToActivitySortByEnum(), tags, User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
 
         return Ok(result);
@@ -41,7 +41,22 @@ public class ActivityController: ControllerBase
     {
         logger.LogInformation($"{DateTime.Now}: GetVerifiedActivities(search = '{search}', order = '{order}', tags = '{tags}')");
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "??";
-        var query = new GetActivitiesQuery(search, order, tags, userId.ToNullableGuid(), [ActivityStatus.Verified]);
+        var query = new GetActivitiesQuery(search, order.ToActivitySortByEnum(), tags, User.TryGetCurrentUserId(), [ActivityStatus.Verified]);
+        var result = await mediator.Send(query);
+
+        return Ok(result);
+    }
+
+    [HttpGet("/api/person/{personId}/activities")]
+    public async Task<IActionResult> GetActivitiesByPerson(string personId, string? type, string? order, bool? onlyVerified)
+    {
+        logger.LogInformation($"{DateTime.Now}: GetActivitiesByPerson(personId = '{personId}', type = '{type}', order = '{order}', onlyVerified = '{onlyVerified}')");
+        var query = new GetActivitiesByPersonQuery(
+            personId.ToGuid(),
+            User.TryGetCurrentUserId(),
+            order.ToActivitySortByEnum(),
+            type.ToActivityTypeEnum(),
+            onlyVerified.ToActivityStatusList());
         var result = await mediator.Send(query);
 
         return Ok(result);
@@ -50,9 +65,9 @@ public class ActivityController: ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetActivity(string id)
     {
-        logger.LogInformation($"{DateTime.Now}: GetActivity(id = '{id})");
+        logger.LogInformation($"{DateTime.Now}: GetActivity(id = '{id}')");
 
-        var query = new GetActivityByIdQuery(id, User.TryGetCurrentUserId());
+        var query = new GetActivityByIdQuery(id.ToGuid(), User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
         return Ok(result);
     }
@@ -76,7 +91,7 @@ public class ActivityController: ControllerBase
     {
         logger.LogInformation($"{DateTime.Now}: VerifyActivity(id: '{id}')");
         var command = new VerifyActivityCommand(id.ToGuid());
-        Activity result = await mediator.Send(command);
+        var result = await mediator.Send(command);
 
         return Ok(result);
     }

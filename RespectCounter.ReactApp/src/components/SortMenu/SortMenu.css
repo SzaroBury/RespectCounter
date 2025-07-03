@@ -2,6 +2,7 @@
     position: fixed;
     top: calc(var(--rc-header-height) - 1px);
     left: var(--rc-left-margin);
+    min-width: 250px;
     padding: 1rem;
     padding-top: 50px;
     background-color: var(--bs-secondary-bg);

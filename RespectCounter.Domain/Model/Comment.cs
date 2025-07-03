@@ -7,6 +7,8 @@ public class Comment : Entity, IReactionable
 {
     public string Content { get; set; } = string.Empty;
     public CommentStatus CommentStatus { get; set; } = CommentStatus.Created;
+    public int DirectChildrenCount { get; set; } = 0;
+    public int AllChildrenCount { get; set; } = 0;
     
     public Guid? ActivityId { get; set; }
     public virtual Activity? Activity { get; set; }

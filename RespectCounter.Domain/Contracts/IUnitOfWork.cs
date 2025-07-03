@@ -2,8 +2,9 @@ namespace RespectCounter.Domain.Contracts;
 
 public interface IUnitOfWork : IDisposable
 {
-    // UserManager<IdentityUser> UserManager { get; }
-    // IJwtService JwtService { get; }
     IRepository Repository();
-    Task<int> CommitAsync(CancellationToken cancellationToken);
+    Task<int> CommitAsync(CancellationToken cancellationToken = default);
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }

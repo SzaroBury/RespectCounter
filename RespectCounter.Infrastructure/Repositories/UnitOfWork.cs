@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using RespectCounter.Domain.Contracts;
 
 namespace RespectCounter.Infrastructure.Repositories;
@@ -20,9 +21,24 @@ public class UnitOfWork : IUnitOfWork
         return new Repository(context);
     }
 
-    public Task<int> CommitAsync(CancellationToken cancellationToken)
+    public Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         return context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        await context.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        await context.Database.CommitTransactionAsync(cancellationToken);
+    }
+
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        await context.Database.RollbackTransactionAsync(cancellationToken);
     }
 
     public void Dispose()

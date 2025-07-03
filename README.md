@@ -38,22 +38,50 @@ Follow these steps to set up the project locally:
     Ensure you have the following installed:
     - [**.NET 8 SDK**](https://dotnet.microsoft.com/download/dotnet/8.0)  
     - [**Node.js (v23.0.0)**](https://nodejs.org/)
+    - [**Docker**](https://www.docker.com/)
 
 2. **Clone the repository:**
    ```sh
    git clone https://github.com/SzaroBury/RespectCounter.git
    ```
    
-3. **Start the API:**
+3. **Start the API (manual):**
    ```sh
    dotnet run --project ./RespectCounter.API/
    ```
 
-4. **Start the React app:**
+4. **Start the React app (manual):**
    ```sh
    cd ./RespectCounter.ReactApp/
    npm install    # Restore dependencies
    npm start      # Start the frontend application
+   ```
+
+---
+
+## **Running with Docker Compose**
+
+The project includes a `docker-compose.yml` file for easy multi-container setup (API, frontend with Nginx, and database).
+
+### **How to run:**
+
+1. Make sure Docker is running on your machine.
+2. From the project root, run:
+   ```sh
+   docker-compose up --build
+   ```
+   This will build and start all services:
+   - **respectcounter-api**: .NET backend API
+   - **respectcounter-reactapp**: React frontend (built with Vite, served by Nginx)
+   - **respectcounter-db**: SQL Server database
+
+   The React frontend is served by Nginx, which also proxies API requests to the backend.
+
+3. Access the app in your browser at [http://localhost:8080](http://localhost:8080)
+
+4. To stop and remove containers:
+   ```sh
+   docker-compose down
    ```
 
 ---
@@ -72,8 +100,6 @@ Follow these steps to set up the project locally:
 ## To-Do List
 
 Planned improvements and features:
-- Implement JWT authentication
-- Improve data refreshing after user actions
 - Create a moderation page for verifying public figures and activities
 - Add an endpoint for requesting comment replies
 - Implement data hiding functionality
@@ -81,4 +107,3 @@ Planned improvements and features:
 - Implement pagination
 - Add support for user avatars and images for public figures and activities
 - Introduce a reporting system for activities and comments
-- Use Logger

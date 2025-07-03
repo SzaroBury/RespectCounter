@@ -1,20 +1,14 @@
 using MediatR;
+using RespectCounter.Application.DTOs;
+using RespectCounter.Application.Services;
 using RespectCounter.Domain.Contracts;
 using RespectCounter.Domain.Model;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetTagsQuery : IRequest<List<Tag>>
-    {
-        public int Level { get; set; } = 5;
+    public record GetTagsQuery(int Level = 5) : IRequest<IEnumerable<TagDTO>>;
 
-        public GetTagsQuery(int level)
-        {
-            Level = level;
-        }
-    }
-
-    public class GetTagsQueryHandler : IRequestHandler<GetTagsQuery, List<Tag>>
+    public class GetTagsQueryHandler : IRequestHandler<GetTagsQuery, IEnumerable<TagDTO>>
     {
         private readonly IUnitOfWork uow;
 
@@ -23,13 +17,15 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<List<Tag>> Handle(GetTagsQuery request, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-            // return await uow.Repository().FindQueryable<Tag>(t => t.Level > 0)
-            //     .Include("Activities").Include("Persons")
-            //     .OrderByDescending(t => t.Activities.Count + t.Persons.Count)
-            //     .ToListAsync(cancellationToken);
+        public async Task<IEnumerable<TagDTO>> Handle(GetTagsQuery request, CancellationToken cancellationToken)
+        {               
+            var tags = await uow.Repository().FindListAsync<Tag>(
+                t => t.Level < request.Level,
+                ["Activities", "Persons"],
+                q => q.OrderByDescending(c => c.Created),
+                cancellationToken
+            );
+            return tags.Select(p => p.ToDTO());
         }
     }
 }

@@ -1,12 +1,14 @@
 using MediatR;
 using RespectCounter.Domain.Model;
 using RespectCounter.Domain.Contracts;
+using RespectCounter.Application.DTOs;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Commands
 {
-    public record VerifyActivityCommand(Guid Id) : IRequest<Activity>;
+    public record VerifyActivityCommand(Guid Id) : IRequest<ActivityDTO>;
 
-    public class VerifyActivityCommandHandler : IRequestHandler<VerifyActivityCommand, Activity>
+    public class VerifyActivityCommandHandler : IRequestHandler<VerifyActivityCommand, ActivityDTO>
     {
         private readonly IUnitOfWork uow;
 
@@ -15,7 +17,7 @@ namespace RespectCounter.Application.Commands
             this.uow = uow;
         }
 
-        public async Task<Activity> Handle(VerifyActivityCommand request, CancellationToken cancellationToken)
+        public async Task<ActivityDTO> Handle(VerifyActivityCommand request, CancellationToken cancellationToken)
         {
             DateTime now = DateTime.Now;
 
@@ -28,7 +30,7 @@ namespace RespectCounter.Application.Commands
             a.LastUpdated = now;
             await uow.CommitAsync(cancellationToken);
 
-            return a;
+            return a.ToDTO();
         }
     }
 }

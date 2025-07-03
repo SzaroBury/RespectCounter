@@ -2,12 +2,13 @@ using MediatR;
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 using RespectCounter.Domain.Contracts;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetSimplePersonsQuery() : IRequest<List<SimplePersonDTO>>;
+    public record GetSimplePersonsQuery() : IRequest<IEnumerable<SimplePersonDTO>>;
 
-    public class GetSimplePersonsQueryHandler : IRequestHandler<GetSimplePersonsQuery, List<SimplePersonDTO>>
+    public class GetSimplePersonsQueryHandler : IRequestHandler<GetSimplePersonsQuery, IEnumerable<SimplePersonDTO>>
     {
         private readonly IUnitOfWork uow;
         
@@ -16,14 +17,15 @@ namespace RespectCounter.Application.Queries
             this.uow = uow;
         }
 
-        public async Task<List<SimplePersonDTO>> Handle(GetSimplePersonsQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<SimplePersonDTO>> Handle(GetSimplePersonsQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-            // var persons = await uow.Repository()
-            //                     .FindQueryable<Person>(p => p.Status != PersonStatus.Hidden)
-            //                     .Select(p => p.ToSimpleDTO())
-            //                     .ToListAsync(cancellationToken);
-            // return persons;
+            var persons = await uow.Repository().FindListAsync<Person>(
+                p => p.Status != PersonStatus.Hidden,
+                ["Activities", "Persons"],
+                q => q.OrderByDescending(c => c.Created),
+                cancellationToken
+            );
+            return persons.Select(p => p.ToSimpleDTO());
         }
     }
 }

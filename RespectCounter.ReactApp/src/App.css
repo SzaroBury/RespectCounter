@@ -1,7 +1,12 @@
+html {
+  height: 100%;
+}
+
 :root {
   --rc-left-margin: 3em;
   --rc-rigth-margin: 3em;
   --rc-btn-color: #212529;
+  --rc-btn-hover-color: #474b50;
   --rc-header-height: 60px;
   --bs-secondary-bg: rgb(250, 250, 250) !important;
   --bs-border-radius: 18px !important;
@@ -29,11 +34,12 @@
 }
 
 .btn-outline-primary {
+  
   --bs-btn-color: var(--rc-btn-color) !important;
   --bs-btn-border-color: var(--bs-border-color) !important;
-  --bs-btn-hover-color: var(--bs-white) !important;
-  --bs-btn-hover-bg: var(--rc-btn-color) !important;
-  --bs-btn-hover-border-color: var(--rc-btn-color) !important;
+  --bs-btn-hover-color: var(--rc-btn-color) !important;
+  --bs-btn-hover-bg: transparent !important;
+  --bs-btn-hover-border-color: var(--rc-btn-hover-color) !important;
   --bs-btn-focus-shadow-rgb: 33, 37, 41 !important;
   --bs-btn-active-color: var(--bs-white) !important;
   --bs-btn-active-bg: var(--rc-btn-color) !important;
@@ -48,6 +54,8 @@
 
 body {
   transition: all 0.3s ease-in-out;
+  height: calc(100% - var(--rc-header-height));
+  z-index: 50
 }
 
 .app {

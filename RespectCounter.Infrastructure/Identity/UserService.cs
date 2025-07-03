@@ -22,6 +22,18 @@ public class UserService : IUserService
         return appUser.ToDomain();
     }
 
+    public async Task<User?> FindByIdAsync(Guid id)
+    {
+        AppUser? appUser = await _userManager.FindByIdAsync(id.ToString());
+
+        if (appUser == null)
+        {
+            return null;
+        }
+        
+        return appUser.ToDomain();
+    }
+
     public async Task<User> GetByNameAsync(string username)
     {
         var appUser = await _userManager.FindByNameAsync(username)
@@ -118,7 +130,7 @@ public class UserService : IUserService
         return appUser.ToDomain();
     }
 
-    public async Task SetUserRefreshTokenAsync(Guid userId, string refreshToken, DateTime refreshTokenExpiration)
+    public async Task SetUserRefreshTokenAsync(Guid userId, string? refreshToken, DateTime? refreshTokenExpiration)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString())
             ?? throw new KeyNotFoundException("User with the given ID was not found.");

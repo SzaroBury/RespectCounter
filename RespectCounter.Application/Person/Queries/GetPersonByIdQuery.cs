@@ -2,6 +2,7 @@
 using RespectCounter.Application.DTOs;
 using RespectCounter.Domain.Model;
 using RespectCounter.Domain.Contracts;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Queries
 {
@@ -20,27 +21,27 @@ namespace RespectCounter.Application.Queries
 
         public async Task<PersonDTO> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-            // var person = await uow.Repository().FindQueryable<Person>(p => p.Id == request.Id)
-            //     .Include(p => p.Tags)
-            //     .Include(p => p.Comments).ThenInclude(c => c.Children)
-            //     .Include(p => p.Activities)
-            //     .Include(p => p.Reactions)
-            //     .Include(a => a.CreatedBy)
-            //     .FirstOrDefaultAsync(cancellationToken);
-            // if (person is null)
-            // {
-            //     throw new KeyNotFoundException("Person not found. Please enter the ID of an existing person.");
-            // }
+            Guid? userId = null;
+            if(request.UserId.HasValue)
+            {
+                var user = await userService.GetByIdAsync(request.UserId.Value);
+                userId = user?.Id;
+            }
 
-            // string? userGuid = null;
-            // if(request.UserId.HasValue)
-            // {
-            //     User? user = await userService.GetByIdAsync(request.UserId.Value);
-            //     userGuid = user?.Id ?? null;
-            // }
+            var person = await uow.Repository()
+                .SingleOrDefaultAsync<Person>(
+                    a => a.Id == request.Id,
+                    "Activities,Comments.Children,Reactions,Tags",
+                    cancellationToken
+                ) ?? throw new KeyNotFoundException("The person was not found. Please enter Id of an existing person.");
 
-            // return person.ToDTO(userGuid);
+
+            var comments = await uow.Repository()
+                .FindListAsync<Comment>(c => c.PersonId == person.Id);
+
+            person.CreatedBy = await userService.GetByIdAsync(person.CreatedById);
+
+            return person.ToDTO(userId);
         }
     }
 }

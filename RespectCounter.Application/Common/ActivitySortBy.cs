@@ -2,10 +2,10 @@ namespace RespectCounter.Application.Common;
 
 public enum ActivitySortBy
 {
-    LatestAdded,
-    BestMatching,
+    Trending,
     MostLiked,
     LeastLiked,
+    LatestAdded,
     LatestHappend,
-    Trending
+    BestMatching,
 }

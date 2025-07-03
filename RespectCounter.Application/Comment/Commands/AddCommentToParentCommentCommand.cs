@@ -2,12 +2,14 @@ using System.Security;
 using MediatR;
 using RespectCounter.Domain.Model;
 using RespectCounter.Domain.Contracts;
+using RespectCounter.Application.DTOs;
+using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Commands
 {
-    public record AddCommentToParentCommentCommand(string ParentCommentId, string Content, Guid UserId) : IRequest<Comment>;
+    public record AddCommentToParentCommentCommand(Guid ParentCommentId, string Content, Guid UserId) : IRequest<CommentDTO>;
 
-    public class AddCommentToParentCommentCommandHandler : IRequestHandler<AddCommentToParentCommentCommand, Comment>
+    public class AddCommentToParentCommentCommandHandler : IRequestHandler<AddCommentToParentCommentCommand, CommentDTO>
     {
         private readonly IUnitOfWork uow;
         private readonly IUserService userService;
@@ -18,36 +20,58 @@ namespace RespectCounter.Application.Commands
             this.userService = userService;
         }
 
-        public async Task<Comment> Handle(AddCommentToParentCommentCommand request, CancellationToken cancellationToken)
+        public async Task<CommentDTO> Handle(AddCommentToParentCommentCommand request, CancellationToken cancellationToken)
         {
-            User? user = await userService.GetByIdAsync(request.UserId);
-            if(user == null) throw new SecurityException("Authentication issue. No user found.");
-
-            DateTime now = DateTime.Now;
-            Guid parentCommentId;
-            if(!Guid.TryParse(request.ParentCommentId, out parentCommentId))  throw new ArgumentException("Invalid id format.");
-
-            Comment? targetComment = await uow.Repository().FindByIdAsync<Comment>(parentCommentId);
-            if(targetComment == null) throw new KeyNotFoundException("There is no comment with the given id value.");
-
-            Comment comment = new Comment 
+            await uow.BeginTransactionAsync(cancellationToken);
+            try
             {
-                ParentId = parentCommentId,
-                Content = request.Content,
-                
-                Created = now,
-                CreatedById = user.Id,
-                LastUpdated = now,
-                LastUpdatedById = user.Id,
-            };
-            targetComment.Children.Add(comment);
-            await uow.CommitAsync(cancellationToken);
+                User? user = await userService.GetByIdAsync(request.UserId)
+                    ?? throw new SecurityException("Authentication issue. No user found.");
 
-            //cleaning data before sending it to the client
-            comment.CreatedBy = null;
-            comment.LastUpdatedBy = null;
+                Comment parentComment = await uow.Repository().SingleOrDefaultAsync<Comment>(
+                    comment => comment.Id == request.ParentCommentId,
+                    "Parent",
+                    cancellationToken
+                ) ?? throw new KeyNotFoundException("There is no comment with the given id value.");
 
-            return targetComment;
+                parentComment.DirectChildrenCount++;
+                parentComment.AllChildrenCount++;
+
+                DateTime now = DateTime.Now;
+                Comment comment = new()
+                {
+                    ParentId = parentComment.Id,
+                    Content = request.Content,
+
+                    Created = now,
+                    CreatedById = user.Id,
+                    LastUpdated = now,
+                    LastUpdatedById = user.Id,
+                };
+
+                parentComment.Children.Add(comment);
+                uow.Repository().Update(parentComment);
+                uow.Repository().Add(comment);
+
+                Comment? nextParentComment = parentComment.Parent;
+                while (nextParentComment != null)
+                {
+                    nextParentComment.AllChildrenCount++;
+                    uow.Repository().Update(nextParentComment);
+                    nextParentComment = await uow.Repository().SingleOrDefaultAsync<Comment>(
+                        comment => comment.Id == parentComment.ParentId,
+                        cancellationToken: cancellationToken
+                    );
+                }
+
+                await uow.CommitTransactionAsync(cancellationToken);
+                return parentComment.ToDTO(1, user.Id);
+            }
+            catch
+            {
+                await uow.RollbackTransactionAsync(cancellationToken);
+                throw;
+            }
         }
     }
 }

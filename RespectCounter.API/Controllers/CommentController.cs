@@ -1,4 +1,3 @@
-using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,21 +21,28 @@ public class CommentController: ControllerBase
     }
 
     #region Queries
-    [HttpGet("api/activity/{id}/comments")]
-    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2)
+    [HttpGet("/api/activity/{id}/comments")]
+    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2, string? order = "")
     {
         logger.LogInformation($"{DateTime.Now}: GetCommentsForActivity(id: '{id}', level: {level})");
-        var currentUserId = User.TryGetCurrentUserId();
-        var query = new GetCommentsForActivityQuery(id, level, currentUserId);
+        var query = new GetCommentsForActivityQuery(
+            id.ToGuid(),
+            level,
+            User.TryGetCurrentUserId(),
+            order.ToCommentSortByEnum());
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
-    [HttpGet("api/person/{id}/comments")]
-    public async Task<IActionResult> GetCommentsForPerson(string id, [FromQuery] int level = 2)
+    [HttpGet("/api/person/{id}/comments")]
+    public async Task<IActionResult> GetCommentsForPerson(string id, [FromQuery] int level = 2, string? order = "")
     {
         logger.LogInformation($"{DateTime.Now}: GetCommentsForPerson(id: '{id}', level: {level})");
-        var query = new GetCommentsForPersonQuery(id.ToGuid(), level, User.TryGetCurrentUserId());
+        var query = new GetCommentsForPersonQuery(
+            id.ToGuid(),
+            level,
+            User.TryGetCurrentUserId(),
+            order.ToCommentSortByEnum());
         var result = await mediator.Send(query);
         return Ok(result);
     }
@@ -49,22 +55,22 @@ public class CommentController: ControllerBase
     public async Task<IActionResult> CommentToComment(string id, [FromBody] string content)
     {
         logger.LogInformation($"{DateTime.Now}: CommentToComment(id: '{id}', content: '{content}')");
-        var command = new AddCommentToParentCommentCommand(id, content, User.GetCurrentUserId());
+        var command = new AddCommentToParentCommentCommand(id.ToGuid(), content, User.GetCurrentUserId());
         var result = await mediator.Send(command);
         return Ok(result);
     }
 
-    [HttpPost("api/activity/{id}/comment")]
+    [HttpPost("/api/activity/{id}/comment")]
     [Authorize]
     public async Task<IActionResult> CommentActivity(string id, [FromBody] string content)
     {
         logger.LogInformation($"{DateTime.Now}: CommentActivity(id: '{id}', content: '{content}')");
-        var command = new AddCommentToActivityCommand(id, content, User.GetCurrentUserId());
+        var command = new AddCommentToActivityCommand(id.ToGuid(), content, User.GetCurrentUserId());
         var result = await mediator.Send(command);
         return Ok(result);
     }
 
-    [HttpPost("api/person/{id}/comment")]
+    [HttpPost("/api/person/{id}/comment")]
     [Authorize]
     public async Task<IActionResult> CommentPerson(string id, [FromBody] string content)
     {

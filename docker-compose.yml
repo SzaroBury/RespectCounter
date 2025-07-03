@@ -17,18 +17,21 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Default=Server=db;Database=RespectDb;User=sa;Password=SomeStrong!Passw0rd;TrustServerCertificate=True
     ports:
-      - "5292:8080"
+      - "8080:8080"
     depends_on:
       - db
+    command: ["/wait-for-it.sh", "db:1433", "-t", "30", "--", "dotnet", "RespectCounter.API.dll"]
 
   frontend:
     build:
-      context: ./RespectCounter.ReactApp
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: RespectCounter.ReactApp/Dockerfile
     ports:
       - "3000:80"
     depends_on:
       - api
+    command: ["/wait-for-it.sh", "api:8080", "-t", "30", "--", "nginx", "-g", "daemon off;"]
+    
 
 volumes:
   mssql_data:

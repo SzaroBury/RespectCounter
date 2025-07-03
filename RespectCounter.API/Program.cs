@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,10 +7,10 @@ using RespectCounter.Domain.Contracts;
 using RespectCounter.Infrastructure;
 using RespectCounter.Infrastructure.Repositories;
 using RespectCounter.Infrastructure.Services;
-using RespectCounter.Application;
 using RespectCounter.API.Middleware;
 using RespectCounter.Infrastructure.Identity;
 using RespectCounter.Application.Common;
+using RespectCounter.Application.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,20 +31,23 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddControllers(); // .AddJsonOptions(o => o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles); //to prevent reference cycle error
 
-if(builder.Configuration["DB"] == "InMemory")
+if (builder.Configuration["DB"] == "InMemory")
 {
     builder.Services.AddDbContext<RespectDbContext>(options => options.UseInMemoryDatabase("RespectCounterDB"));
     Console.WriteLine("The server is going to use an in-memory database.");
 }
-else builder.Services.AddDbContext<RespectDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+else
+{
+    builder.Services.AddDbContext<RespectDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+}   
 
 builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>().AddEntityFrameworkStores<RespectDbContext>();
 
-builder.Services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
+    builder.Services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(RespectService)));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(AddActivityCommand)));
 
 var jwtSettingsSection = builder.Configuration.GetSection("Jwt");
 var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
@@ -89,10 +91,13 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Automatyczne uruchamianie migracji
-using (var scope = app.Services.CreateScope())
+if (builder.Configuration["DB"] != "InMemory")
 {
-    var initializer = scope.ServiceProvider.GetRequiredService<IDatabaseInitializer>();
-    await initializer.InitializeAsync();
+    using (var scope = app.Services.CreateScope())
+    {
+        var initializer = scope.ServiceProvider.GetRequiredService<IDatabaseInitializer>();
+        await initializer.InitializeAsync();
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

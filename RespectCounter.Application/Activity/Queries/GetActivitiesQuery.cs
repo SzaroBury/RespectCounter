@@ -2,79 +2,92 @@ using MediatR;
 using RespectCounter.Domain.Contracts;
 using RespectCounter.Domain.Model;
 using RespectCounter.Application.DTOs;
+using RespectCounter.Application.Common;
+using RespectCounter.Application.Services;
 
-namespace RespectCounter.Application.Queries
+namespace RespectCounter.Application.Queries;
+
+public record GetActivitiesQuery(
+    string Search, 
+    ActivitySortBy Order, 
+    string Tags, 
+    Guid? UserId, 
+    List<ActivityStatus>? Status = null
+) : IRequest<IEnumerable<ActivityDTO>>;
+
+public class GetActivitiesQueryHandler : IRequestHandler<GetActivitiesQuery, IEnumerable<ActivityDTO>>
 {
-    public record GetActivitiesQuery(
-        string Search, 
-        string Order, 
-        string Tags, 
-        Guid? UserId, 
-        List<ActivityStatus>? Status = null
-    ) : IRequest<List<ActivityDTO>>;
+    private readonly IUnitOfWork uow;
+    private readonly IUserService userService;
 
-    public class GetActivitesQueryHandler : IRequestHandler<GetActivitiesQuery, List<ActivityDTO>>
+    public GetActivitiesQueryHandler(IUnitOfWork uow, IUserService userService)
     {
-        private readonly IUnitOfWork uow;
-        private readonly IUserService userService;
+        this.uow = uow;
+        this.userService = userService;
+    }
 
-        public GetActivitesQueryHandler(IUnitOfWork uow, IUserService userService)
+    public async Task<IEnumerable<ActivityDTO>> Handle(GetActivitiesQuery request, CancellationToken cancellationToken)
+    {
+        IEnumerable<ActivityStatus> statusFilter;
+        if (request.Status == null || request.Status.Count == 0)
         {
-            this.uow = uow;
-            this.userService = userService;
+            statusFilter = [ActivityStatus.Verified, ActivityStatus.NotVerified];
+        }
+        else
+        {
+            statusFilter = request.Status!;
         }
 
-        public async Task<List<ActivityDTO>> Handle(GetActivitiesQuery request, CancellationToken cancellationToken)
+        IQueryable<Activity> query = uow.Repository().FindQueryable<Activity>(
+            a => statusFilter.Contains(a.Status)
+        );
+
+        if(!string.IsNullOrEmpty(request.Search))
         {
-            throw new NotImplementedException();
-            // IEnumerable<ActivityStatus> statuses;
-            // if (request.Status == null || request.Status.Count == 0)
-            // {
-            //     statuses = [ActivityStatus.Verified, ActivityStatus.NotVerified];
-            // }
-            // else
-            // {
-            //     statuses = request.Status!;
-            // }
-
-            // IQueryable<Activity> activities = uow.Repository().FindQueryable<Activity>(
-            //     a => statuses.Contains(a.Status)
-            // ).Include(a => a.Person)
-            // .Include(a => a.Comments).ThenInclude(c => c.Children)
-            // .Include(a => a.Reactions)
-            // .Include(a => a.Tags)
-            // .Include(a => a.CreatedBy);
-
-            // if(!string.IsNullOrEmpty(request.Search))
-            // {
-            //     var search = request.Search.ToLower();
-            //     activities = activities.Where(a =>
-            //         (a.Value != null && a.Value.ToLower().Contains(search)) ||
-            //         (a.Source != null && a.Source.ToLower().Contains(search)) ||
-            //         (a.Description != null && a.Description.ToLower().Contains(search)) ||
-            //         a.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(search))
-            //     );
-            // }
-
-            // IEnumerable<Activity> result = await activities.ToListAsync(cancellationToken);
-            
-            // if(!string.IsNullOrEmpty(request.Tags))
-            // {
-            //     var tags = request.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim().ToLower());
-            //     result = result.Where(a => tags.All(tag => a.Tags.Any(at => at.Name.ToLower() == tag)));
-            // }
-            
-            // var order = string.IsNullOrEmpty(request.Order) ? "la" : request.Order;  
-            // var orderedResult = RespectService.OrderActivities(result, order);
-
-            // string? userGuid = null;
-            // if(request.UserId.HasValue)
-            // {
-            //     User? user = await userService.GetByIdAsync(request.UserId.Value);
-            //     userGuid = user?.Id.ToString();
-            // }
-
-            // return orderedResult.Select(a => a.ToDTO(userGuid)).ToList();
+            var search = request.Search.ToLower();
+            query = query.Where(a =>
+                (a.Value != null && a.Value.ToLower().Contains(search)) ||
+                (a.Source != null && a.Source.ToLower().Contains(search)) ||
+                (a.Description != null && a.Description.ToLower().Contains(search)) ||
+                a.Tags.Any(t => t.Name != null && t.Name.ToLower().Contains(search))
+            );
         }
+        
+        if(!string.IsNullOrEmpty(request.Tags))
+        {
+            var tags = request.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim().ToLower());
+            query = query.Where(
+                a => tags.All(
+                    tag => a.Tags.Any(
+                        at => at.Name.Equals(tag, StringComparison.CurrentCultureIgnoreCase)
+                    )
+                )
+            );
+        }
+
+        var orderedQuery = query.ApplySorting(request.Order);
+
+        Guid? userGuid = null;
+        if(request.UserId.HasValue)
+        {
+            User? user = await userService.GetByIdAsync(request.UserId.Value);
+            userGuid = user?.Id;
+        }
+
+        var activities = await uow.Repository()
+            .FindListAsync(
+                orderedQuery,
+                ["Person", "Comments.Children", "Reactions", "Tags"],
+                null,
+                cancellationToken
+            );
+
+        foreach (var act in activities)
+        {
+            act.CreatedBy = await userService.GetByIdAsync(act.CreatedById);
+        }
+
+        return activities.Select(a => a.ToDTO(userGuid));
     }
 }

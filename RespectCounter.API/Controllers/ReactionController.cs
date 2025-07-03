@@ -30,7 +30,7 @@ public class ReactionController : ControllerBase
     public async Task<IActionResult> ReactionToActivity(string id, int reaction)
     {
         logger.LogInformation($"{DateTime.Now}: ReactionToActivity(id: '{id}', reaction: {reaction})");
-        var command = new AddReactionToActivityCommand(id, reaction, User.GetCurrentUserId());
+        var command = new AddReactionToActivityCommand(id.ToGuid(), reaction, User.GetCurrentUserId());
         var result = await mediator.Send(command);
         return Ok(result);
     }

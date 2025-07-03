@@ -60,7 +60,7 @@ public class TagController : ControllerBase
         return Ok(new List<Tag>());
     }
 
-    [HttpGet("api/person/{id}/tags")]
+    [HttpGet("/api/person/{id}/tags")]
     public async Task<IActionResult> GetPersonTags(string id)
     {
         logger.LogInformation($"{DateTime.Now}: GetPersonTags(id: '{id}')");
@@ -72,7 +72,7 @@ public class TagController : ControllerBase
 
     #region Commands
 
-    [HttpPost("api/activity/{id}/tag/{tag}")]
+    [HttpPost("/api/activity/{id}/tag/{tag}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> TagActivity(string id, string tag)
     {
@@ -82,7 +82,7 @@ public class TagController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("api/person/{id}/tag/{tag}")]
+    [HttpPost("/api/person/{id}/tag/{tag}")]
     [Authorize]
     public async Task<IActionResult> TagPerson(string id, string tag)
     {
