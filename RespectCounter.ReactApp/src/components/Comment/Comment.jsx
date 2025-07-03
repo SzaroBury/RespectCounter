@@ -66,7 +66,8 @@ function Comment({comment, onReplyAdded}) {
                     <div className="reaction-buttons-container">
                         <ReactionButtons 
                             respect={comment.respect} 
-                            targetParentId={comment.id}
+                            targetType="comment"
+                            targetId={comment.id}
                             reaction={comment.currentUsersReaction}
                         />
                     </div>

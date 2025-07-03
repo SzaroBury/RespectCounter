@@ -3,7 +3,7 @@ import { useAuth } from "../../utils/AuthProvider/AuthProvider";
 import { useEffect, useState } from "react";
 import { postReaction } from "../../services/reactionService";
 
-function ReactionButtons({respect, reaction, targetActivityId = "", targetPersonId = "", targetParentId = "", showButtons = true}) {
+function ReactionButtons({respect, reaction, targetType = "", targetId = "", showButtons = true}) {
     const {isLoggedIn, logout, openLoginPopup} = useAuth();
     const [displayedRespect, setDisplayedRespect] = useState(respect);
     const [clickedReaction, setClickedReaction] = useState(reaction);
@@ -16,17 +16,8 @@ function ReactionButtons({respect, reaction, targetActivityId = "", targetPerson
         }
         // to do: if reaction === clickedReaction -> remove reaction
 
-        let targetType = "";
-        let targetId = "";
-        if (targetActivityId !== "") {
-            targetType = "activity";
-            targetId = targetActivityId;
-        } else if (targetPersonId !== "") {
-            targetType = "person";
-            targetId = targetPersonId;
-        } else if (targetParentId !== "") {
-            targetType = "comment";
-            targetId = targetParentId;
+        if (targetType === "") {
+            throw Error("");
         }
 
         try {

@@ -56,7 +56,7 @@ function Activity({a: activity, showCommentsButton=true}) {
             <div className="activity-actions">
                 {showCommentsButton && <CommentsButton act={activity} />}
                 <div className="activity-reaction-buttons">
-                    <ReactionButtons respect={activity.respect} reaction={activity.currentUsersReaction} targetActivityId={activity.id} />
+                    <ReactionButtons respect={activity.respect} reaction={activity.currentUsersReaction} targetType="activity" targetId={activity.id} />
                     {isAdmin && (
                         <div className="dropdown ms-2" style={{ position: "relative", display: "inline-block" }} ref={menuRef}>
                             <button
