@@ -3,36 +3,34 @@ import { useAuth } from "../../utils/AuthProvider/AuthProvider";
 import { useEffect, useState } from "react";
 import { postReaction } from "../../services/reactionService";
 
-function ReactionButtons({respect, reaction, targetType = "", targetId = "", showButtons = true}) {
-    const {isLoggedIn, logout, openLoginPopup} = useAuth();
+function ReactionButtons({respect, defaultReaction, targetType = "", targetId = "", showButtons = true}) {
+    const {isLoggedIn, openLoginPopup} = useAuth();
     const [displayedRespect, setDisplayedRespect] = useState(respect);
-    const [clickedReaction, setClickedReaction] = useState(reaction);
+    const [clickedReaction, setClickedReaction] = useState(defaultReaction);
 
     const handleClick = async (reaction) => {
-        if(!isLoggedIn)
-        {
+        if(!isLoggedIn) {
             openLoginPopup();
             return;
         }
-        // to do: if reaction === clickedReaction -> remove reaction
-
+        
         if (targetType === "") {
             throw Error("");
         }
-
+        
+        const prevClickedReaction = clickedReaction;
+        const prevDisplayedRespect = displayedRespect;
+        setDisplayedRespect(displayedRespect + reaction);
+        setClickedReaction(reaction);
+        
         try {
+            // to do: if reaction === clickedReaction -> remove reaction
             const response = await postReaction({ targetType, targetId, reaction });
             setDisplayedRespect(response);
-            setClickedReaction(reaction);
-            console.log('ReactionButtons: success ', response);
         } catch (error) {
-            if (error.response && error.response.status === 401) {
-                console.warn('Unauthorized! Redirecting to login...');
-                logout();
-                openLoginPopup();
-            } else {
-                console.error('An error occurred:', error);
-            }
+            setDisplayedRespect(prevDisplayedRespect);
+            setClickedReaction(prevClickedReaction);
+            console.error('An error occurred:', error);
         }
     };
 
@@ -43,8 +41,8 @@ function ReactionButtons({respect, reaction, targetType = "", targetId = "", sho
     }, [isLoggedIn]);
 
     useEffect(() => {
-        setClickedReaction(reaction) 
-    }, [reaction]);
+        setClickedReaction(defaultReaction) 
+    }, [defaultReaction]);
 
     return (
         <div className="input-group">

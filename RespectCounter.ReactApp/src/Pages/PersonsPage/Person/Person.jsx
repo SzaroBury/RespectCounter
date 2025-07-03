@@ -59,7 +59,7 @@ function Person({ person, index, showTags = false, showDescription = false, show
                     <div className="person-reaction-buttons me-2">
                         <ReactionButtons
                             respect={person.respect}
-                            reaction={person.currentUsersReaction}
+                            defaultReaction={person.currentUsersReaction}
                             targetType="person"
                             targetId={person.id}
                             showButtons={showReactionButtons}
