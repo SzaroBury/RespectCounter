@@ -1,11 +1,11 @@
 import api from "../utils/refreshInterceptor/refreshInterceptor";
 
-export const login = async (formData) => {
-    return await api.post('/api/auth/login', formData);
+export const login = (formData) => {
+    return api.post('/api/auth/login', formData);
 };
 
-export const logout = async () => {
-    await api.post('/api/auth/logout');
+export const logout = () => {
+    api.post('/api/auth/logout');
 };
 
 export const getClaims = async () => {
@@ -20,6 +20,10 @@ export const getClaims = async () => {
             return false;
         }
     }
+};
+
+export const register = (formData) => {
+    return api.post('/api/auth/register', formData);
 };
 
 export const getCurrentUser = () => {

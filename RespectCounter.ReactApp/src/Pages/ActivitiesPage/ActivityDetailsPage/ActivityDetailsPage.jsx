@@ -1,12 +1,13 @@
+import "./ActivityDetailsPage.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
-import axios from 'axios';
-import "./ActivityDetailsPage.css";
+import { useAuth } from "../../../utils/AuthProvider/AuthProvider";
+import { getActivityById } from "../../../services/activityService";
+import { getCommentsByActivityId } from "../../../services/commentService";
 import TagsMenu from "../../../components/TagsMenu/TagsMenu";
 import Activity from "../Activity/Activity";
 import Comment from "../../../components/Comment/Comment";
 import CommentForm from "../../../components/CommentForm/CommentForm";
-import { useAuth } from "../../../utils/AuthProvider/AuthProvider";
 import Loading from "../../../components/Loading/Loading";
 
 function ActivityDetailsPage(params) {
@@ -20,37 +21,37 @@ function ActivityDetailsPage(params) {
     const loadActivity = useCallback(() => {
         console.log("ActivityDetailsPage: loadActivity(id: '" + id + "')");
 
-        axios.get(`/api/activity/${id}`)
-        .then(response => {
-            setAct(response.data);
-        })
-        .catch(error => {
-            if (error.response) {
-                console.error(`HTTP error! Status: ${error.response.status}`);
-            } else if (error.request) {
-                console.error("No response received: ", error.request);
-            } else {
-                console.error("Error setting up the request: ", error.message);
-            }
-        });
+        getActivityById(id)
+            .then(response => {
+                setAct(response.data);
+            })
+            .catch(error => {
+                if (error.response) {
+                    console.error(`HTTP error! Status: ${error.response.status}`);
+                } else if (error.request) {
+                    console.error("No response received: ", error.request);
+                } else {
+                    console.error("Error setting up the request: ", error.message);
+                }
+            });
     }, [id]);
 
     const loadComments = useCallback(() => {
         console.log("ActivityDetailsPage: loadComments()");
 
-        axios.get(`/api/activity/${id}/comments`)
-        .then(response => {
-            setComments(response.data);
-        })
-        .catch(error => {
-            if (error.response) {
-                console.error(`HTTP error! Status: ${error.response.status}`);
-            } else if (error.request) {
-                console.error("No response received: ", error.request);
-            } else {
-                console.error("Error setting up the request: ", error.message);
-            }
-        });
+        getCommentsByActivityId(id)
+            .then(response => {
+                setComments(response.data);
+            })
+            .catch(error => {
+                if (error.response) {
+                    console.error(`HTTP error! Status: ${error.response.status}`);
+                } else if (error.request) {
+                    console.error("No response received: ", error.request);
+                } else {
+                    console.error("Error setting up the request: ", error.message);
+                }
+            });
     }, [id]);
 
     useEffect(() => {

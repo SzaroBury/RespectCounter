@@ -2,7 +2,6 @@ import "./PersonDetailsPage.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../../utils/AuthProvider/AuthProvider";
-import axios from 'axios';
 import Person from "../Person/Person";
 import TagsMenu from "../../../components/TagsMenu/TagsMenu";
 import SortMenu from "../../../components/SortMenu/SortMenu";
@@ -32,7 +31,7 @@ function PersonDetailsPage() {
     const loadPerson = useCallback(() => {
         console.log("PersonDetailsPage: loadPerson(id: '" + id + "')");
         getPerson(id)
-            .then(data => setPerson(data))
+            .then(response => setPerson(response.data))
             .catch(error => {
                 if (error.response) {
                     console.error(`HTTP error! Status: ${error.response.status}`);

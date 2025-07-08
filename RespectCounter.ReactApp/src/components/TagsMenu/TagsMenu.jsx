@@ -1,6 +1,5 @@
 import './TagsMenu.css';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 
 function TagsMenu({countMode = 'count', tagsSelected, setTagsSelected, currentTags}) {
 

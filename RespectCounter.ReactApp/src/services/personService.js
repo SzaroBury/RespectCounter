@@ -1,15 +1,31 @@
 import api from "../utils/refreshInterceptor/refreshInterceptor";
 
-export const getPerson = async (personId) => {
-    const response = await api.get(`/api/person/${personId}`);
-    return response.data;
+export const getPersons = async ({ tags = [], order = "", onlyVerified = false } = {}) => {
+    const params = {};
+    if (tags && tags.length > 0) params.tags = tags.map(ts => ts.name).join(",");
+    if (order) params.order = order;
+    const targetUrl = onlyVerified ? '' : '/all'
+
+    return api.get(`/api/persons${targetUrl}`, { params });
 };
 
-export const hidePerson = async (personId) => {
-    await api.post('/api/person/hide', { personId });
+export const getPerson = (personId) => {
+    return api.get(`/api/person/${personId}`);
 };
 
-export const verifyPerson = async (personId) => {
+export const getPersonsNames = () => {
+    return api.get(`/api/person/names`);
+};
+
+export const postPerson = (person) => {
+    api.post('/api/person', person);
+};
+
+export const hidePerson = (personId) => {
+    api.post('/api/person/hide', { personId });
+};
+
+export const verifyPerson = (personId) => {
     axios.defaults.withCredentials = true;
-    await api.put(`/api/person/${personId}/verify`);
+    api.put(`/api/person/${personId}/verify`);
 };

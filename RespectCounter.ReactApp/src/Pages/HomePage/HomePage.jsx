@@ -1,8 +1,8 @@
 import "./HomePage.css";
+import { useState, useEffect } from 'react';
+import { getPersons } from "../../services/personService";
 import { Link } from 'react-router-dom';
 import Loading from '../../components/Loading/Loading';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import Person from '../PersonsPage/Person/Person';
 
 function HomePage() {
@@ -16,26 +16,24 @@ function HomePage() {
         console.log('HomePage: loadPersons()')
         setPersons([]);
 
-        axios.get(`/api/persons`, {
-            params: {
-                order: "MostRespected"
-            }
-        })
-        .then(response => {
-            setPersons(response.data);
-            setLoadingPersons(false);
-        })
-        .catch(error => {
-            setLoadingPersons(false);
+        const params = { params: { order: "MostRespected" } };
 
-            if (error.response) {
-                console.error(`HTTP error! Status: ${error.response.status}`);
-            } else if (error.request) {
-                console.error("No response received: ", error.request);
-            } else {
-                console.error("Error setting up the request: ", error.message);
-            }
-        });
+        getPersons(params)
+            .then(response => {
+                setPersons(response.data);
+                setLoadingPersons(false);
+            })
+            .catch(error => {
+                setLoadingPersons(false);
+
+                if (error.response) {
+                    console.error(`HTTP error! Status: ${error.response.status}`);
+                } else if (error.request) {
+                    console.error("No response received: ", error.request);
+                } else {
+                    console.error("Error setting up the request: ", error.message);
+                }
+            });
     }
 
     useEffect(() => {

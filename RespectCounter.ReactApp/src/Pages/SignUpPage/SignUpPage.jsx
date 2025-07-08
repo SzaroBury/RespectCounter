@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import axios from 'axios';
 import "./SignUpPage.css";
-import Loading from '../../components/Loading/Loading';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/AuthProvider/AuthProvider';
+import { register, login as loginAPI } from '../../services/authService';
+import Loading from '../../components/Loading/Loading';
 
 function SignUpPage(props) {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -14,48 +14,49 @@ function SignUpPage(props) {
     const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [validationMessage, setValidationMessage] = useState();
-    
+
     const handleSignUp = async (e) => {
         e.preventDefault();
         setValidationMessage("");
         setLoading(true);
-        if(formData.password !== confirmationPassword)
-        {
+        if (formData.password !== confirmationPassword) {
             setLoading(false);
             setValidationMessage("Passwords don't match.");
         }
-        try {
-            console.log('SignUpPage: sending sign up request:', formData);
-            await axios.post('api/auth/register', formData);
-            handleLogin();            
-        } catch (error) {
-            setLoading(false);
-            console.warn(error);
-            if (error.response && error.response.status === 400) {
-                console.warn(`${error.response.data.title} - ${error.response.data.message}`);
-                setValidationMessage(error.response.data.message);
-            } else {
-                console.error('An error occurred:', error.response.message);
-            }
-        } 
+        console.log('SignUpPage: sending sign up request:', formData);
+        register(formData)
+            .then(() => {
+                handleLogin();
+            })
+            .catch(error => {
+                setLoading(false);
+                console.warn(error);
+                if (error.response && error.response.status === 400) {
+                    console.warn(`${error.response.data.title} - ${error.response.data.message}`);
+                    setValidationMessage(error.response.data.message);
+                } else {
+                    console.error('An error occurred:', error);
+                }
+            });
     };
 
     const handleLogin = async () => {
-        try {
-            console.log('SignUpPage: sending login request:', formData);
-            const response = await axios.post('api/auth/login', { username: formData.username, password: formData.password });
-            console.log('SignUpPage: success ', response.data);
-            login(formData.username);
-            setLoading(false);
-            navigate("/");
-        } catch (error) {
-            setLoading(false);
-            if (error.response && error.status === 40) {
-                console.warn('Unauthorized! Redirecting to login...');
-            } else {
-                console.error('An error occurred:', error);
-            }
-        }        
+        const formData = { username: formData.username, password: formData.password };
+        loginAPI()
+            .then(response => {
+                login(formData.username);
+                setLoading(false);
+                navigate("/");
+
+            })
+            .catch(error => {
+                setLoading(false);
+                if (error.response && error.status === 40) {
+                    console.warn('Unauthorized! Redirecting to login...');
+                } else {
+                    console.error('An error occurred:', error);
+                }
+            });
     }
 
     const handleDataChange = (e) => {
@@ -72,45 +73,45 @@ function SignUpPage(props) {
                 <h2 className='signup-header'>Sign Up</h2>
                 <form className='signup-form needs-validation' onSubmit={handleSignUp}>
                     <div className="input-group has-validation mb-3">
-                        <input type="text" className="form-control has-validation" placeholder="Username" name="username" required minlength="3" id="validationCustomUsername"
+                        <input type="text" className="form-control has-validation" placeholder="Username" name="username" required minLength="3" id="validationCustomUsername"
                             onChange={handleDataChange}
-                        />   
-                        <div class="invalid-feedback">
+                        />
+                        <div className="invalid-feedback">
                             Please choose a username.
-                        </div>                    
+                        </div>
                     </div>
                     <div className="input-group mb-3">
-                        <input type="email" className="form-control" placeholder="Email" name="email" required 
-                            onChange={handleDataChange}/>                        
+                        <input type="email" className="form-control" placeholder="Email" name="email" required
+                            onChange={handleDataChange} />
                     </div>
                     <div className="input-group mb-3">
-                        <input 
-                            type={showPassword ? "text" : "password"} 
-                            className="form-control" 
-                            placeholder="Password" 
-                            name="password" 
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            className="form-control"
+                            placeholder="Password"
+                            name="password"
                             required
-                            onChange={handleDataChange}/>
-                        <button 
-                            className="btn btn-outline-primary" 
-                            type="button" 
+                            onChange={handleDataChange} />
+                        <button
+                            className="btn btn-outline-primary"
+                            type="button"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             <i className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}></i>
                         </button>
                     </div>
                     <div className="input-group mb-3">
-                        <input 
-                            type={showConfirmationPassword ? "text" : "password"} 
-                            className="form-control" 
-                            placeholder="Confirm Password" 
-                            name="confirm_password" 
+                        <input
+                            type={showConfirmationPassword ? "text" : "password"}
+                            className="form-control"
+                            placeholder="Confirm Password"
+                            name="confirm_password"
                             required
                             value={confirmationPassword}
                             onChange={(e) => setConfirmationPassword(e.target.value)}
                         />
-                        <button 
-                            className="btn btn-outline-primary" 
+                        <button
+                            className="btn btn-outline-primary"
                             type="button"
                             onClick={() => setShowConfirmationPassword(!showConfirmationPassword)}
                         >

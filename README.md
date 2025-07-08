@@ -101,6 +101,7 @@ The project includes a `docker-compose.yml` file for easy multi-container setup 
 
 Planned improvements and features:
 - Create a moderation page for verifying public figures and activities
+- Add error popups
 - Add an endpoint for requesting comment replies
 - Implement data hiding functionality
 - Improve the home page design

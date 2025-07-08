@@ -41,7 +41,6 @@ function ActivitiesPage(props) {
         console.log("ActivitiesPage: loadActivities()");
         setActivities([]);
     
-        const targetUrl = onlyVerifiedOption ? "activities" : "activities/all";
         const params = { params: { tags: tagsSelected, order: sortOption, onlyVerified: onlyVerifiedOption }}
     
         getActivities(params)

@@ -7,20 +7,8 @@ export const getCommentsByPersonId = async (personId, { order = "" } = {}) => {
     return response.data;
 };
 
-export const getCommentsByActivityId = async (actId) => {
-    try {
-        const response = await api.get(`/api/activity/${actId}/comments`);
-        return response.data;
-    } catch (error) {
-        if (error.response) {
-            console.error(`HTTP error! Status: ${error.response.status}`);
-        } else if (error.request) {
-            console.error("No response received: ", error.request);
-        } else {
-            console.error("Error setting up the request: ", error.message);
-        }
-        throw error;
-    }
+export const getCommentsByActivityId = (actId) => {
+    return api.get(`/api/activity/${actId}/comments`);
 };
 
 export const postComment = async (targetUrl, content) => {

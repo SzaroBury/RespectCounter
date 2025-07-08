@@ -1,7 +1,6 @@
 import '../Comment.css';
 import { useState } from "react";
 import { useAuth } from '../../../utils/AuthProvider/AuthProvider';
-import axios from 'axios';
 
 function ReplyForm({commentId, onReplyAdded, onCancel}) {
     const [ inputValue, setInputValue ] = useState('');
