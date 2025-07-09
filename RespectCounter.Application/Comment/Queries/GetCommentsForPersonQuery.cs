@@ -11,6 +11,8 @@ public record GetCommentsForPersonQuery(
     Guid PersonId,
     int Levels,
     Guid? UserId,
+    int Page,
+    int PageSize,
     CommentSortBy? Order = null
 ) : IRequest<IEnumerable<CommentDTO>>;
 
@@ -40,6 +42,7 @@ public class GetCommentsForPersonQueryHandler : IRequestHandler<GetCommentsForPe
 
         var order = request.Order ?? CommentSortBy.LatestAdded;
         var orderedQuery = query.ApplySorting(order);
+        orderedQuery = orderedQuery.ApplyPaging(request.Page, request.PageSize);
         
         var comments = await uow.Repository().FindListAsync<Comment>(
             orderedQuery,

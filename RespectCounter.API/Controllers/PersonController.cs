@@ -1,4 +1,3 @@
-using System.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,19 +24,37 @@ public class PersonController: ControllerBase
 
     #region Queries
     [HttpGet("/api/persons")]
-    public async Task<IActionResult> GetVerifiedPersons([FromQuery] string search = "", [FromQuery] string order = "")
+    public async Task<IActionResult> GetVerifiedPersons(
+        [FromQuery] string search = "",
+        [FromQuery] string order = "",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {        
         logger.LogInformation($"{DateTime.Now}: GetVerifiedPersons(search: '{search}', order: '{order}')");
-        var query = new GetVerifiedPersonsQuery(search, order.ToPersonSortByEnum(), User.TryGetCurrentUserId());
+        var query = new GetVerifiedPersonsQuery(
+            search,
+            order.ToPersonSortByEnum(),
+            page,
+            pageSize,
+            User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("/api/persons/all")]
-    public async Task<IActionResult> GetPersons([FromQuery] string search = "", [FromQuery] string order = "")
+    public async Task<IActionResult> GetPersons(
+        [FromQuery] string search = "",
+        [FromQuery] string order = "",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetPersons(search: '{search}', order: '{order}')");
-        var query = new GetPersonsQuery(search, order.ToPersonSortByEnum(), User.TryGetCurrentUserId());
+        var query = new GetPersonsQuery(
+            search,
+            order.ToPersonSortByEnum(),
+            page,
+            pageSize,
+            User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
         return Ok(result);
     }

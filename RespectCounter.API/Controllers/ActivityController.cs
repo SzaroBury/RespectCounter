@@ -27,36 +27,67 @@ public class ActivityController: ControllerBase
 
     #region Queries
     [HttpGet("/api/activities/all")]
-    public async Task<IActionResult> GetActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
+    public async Task<IActionResult> GetActivities(
+        [FromQuery] string search = "",
+        [FromQuery] string order = "",
+        [FromQuery] string tags = "",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetActivities(search = '{search}', order = '{order}', tags = '{tags}')");
-        var query = new GetActivitiesQuery(search, order.ToActivitySortByEnum(), tags, User.TryGetCurrentUserId());
+        var query = new GetActivitiesQuery(
+            search,
+            tags,
+            null,
+            order.ToActivitySortByEnum(),
+            page,
+            pageSize,
+            User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
     [HttpGet("/api/activities")]
-    public async Task<IActionResult> GetVerifiedActivities([FromQuery] string search = "", [FromQuery] string order = "", [FromQuery] string tags = "")
+    public async Task<IActionResult> GetVerifiedActivities(
+        [FromQuery] string search = "",
+        [FromQuery] string order = "",
+        [FromQuery] string tags = "",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetVerifiedActivities(search = '{search}', order = '{order}', tags = '{tags}')");
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "??";
-        var query = new GetActivitiesQuery(search, order.ToActivitySortByEnum(), tags, User.TryGetCurrentUserId(), [ActivityStatus.Verified]);
+        var query = new GetActivitiesQuery(
+            search,
+            tags,
+            [ActivityStatus.Verified],
+            order.ToActivitySortByEnum(),
+            page,
+            pageSize,
+            User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
 
         return Ok(result);
     }
 
     [HttpGet("/api/person/{personId}/activities")]
-    public async Task<IActionResult> GetActivitiesByPerson(string personId, string? type, string? order, bool? onlyVerified)
+    public async Task<IActionResult> GetActivitiesByPerson(
+        string personId,
+        string? type = null,
+        string? order = null,
+        bool? onlyVerified = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetActivitiesByPerson(personId = '{personId}', type = '{type}', order = '{order}', onlyVerified = '{onlyVerified}')");
         var query = new GetActivitiesByPersonQuery(
             personId.ToGuid(),
-            User.TryGetCurrentUserId(),
-            order.ToActivitySortByEnum(),
             type.ToActivityTypeEnum(),
-            onlyVerified.ToActivityStatusList());
+            onlyVerified.ToActivityStatusList(),
+            order.ToActivitySortByEnum(),
+            page,
+            pageSize,
+            User.TryGetCurrentUserId());
         var result = await mediator.Send(query);
 
         return Ok(result);

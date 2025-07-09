@@ -9,10 +9,12 @@ namespace RespectCounter.Application.Queries;
 
 public record GetActivitiesQuery(
     string Search, 
-    ActivitySortBy Order, 
     string Tags, 
-    Guid? UserId, 
-    List<ActivityStatus>? Status = null
+    List<ActivityStatus>? Status,
+    ActivitySortBy Order, 
+    int Page,
+    int PageSize,
+    Guid? UserId
 ) : IRequest<IEnumerable<ActivityDTO>>;
 
 public class GetActivitiesQueryHandler : IRequestHandler<GetActivitiesQuery, IEnumerable<ActivityDTO>>
@@ -68,12 +70,7 @@ public class GetActivitiesQueryHandler : IRequestHandler<GetActivitiesQuery, IEn
 
         var orderedQuery = query.ApplySorting(request.Order);
 
-        Guid? userGuid = null;
-        if(request.UserId.HasValue)
-        {
-            User? user = await userService.GetByIdAsync(request.UserId.Value);
-            userGuid = user?.Id;
-        }
+        orderedQuery = orderedQuery.ApplyPaging(request.Page, request.PageSize);
 
         var activities = await uow.Repository()
             .FindListAsync(
@@ -86,6 +83,13 @@ public class GetActivitiesQueryHandler : IRequestHandler<GetActivitiesQuery, IEn
         foreach (var act in activities)
         {
             act.CreatedBy = await userService.GetByIdAsync(act.CreatedById);
+        }
+
+        Guid? userGuid = null;
+        if(request.UserId.HasValue)
+        {
+            User? user = await userService.GetByIdAsync(request.UserId.Value);
+            userGuid = user?.Id;
         }
 
         return activities.Select(a => a.ToDTO(userGuid));

@@ -22,26 +22,40 @@ public class CommentController: ControllerBase
 
     #region Queries
     [HttpGet("/api/activity/{id}/comments")]
-    public async Task<IActionResult> GetCommentsForActivity(string id, [FromQuery] int level = 2, string? order = "")
+    public async Task<IActionResult> GetCommentsForActivity(
+        string id,
+        int level = 2,
+        string? order = "",
+        int page = 1,
+        int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetCommentsForActivity(id: '{id}', level: {level})");
         var query = new GetCommentsForActivityQuery(
             id.ToGuid(),
             level,
             User.TryGetCurrentUserId(),
+            page,
+            pageSize,
             order.ToCommentSortByEnum());
         var result = await mediator.Send(query);
         return Ok(result);
     }
 
     [HttpGet("/api/person/{id}/comments")]
-    public async Task<IActionResult> GetCommentsForPerson(string id, [FromQuery] int level = 2, string? order = "")
+    public async Task<IActionResult> GetCommentsForPerson(
+        string id,
+        int level = 2,
+        string? order = "",
+        int page = 1,
+        int pageSize = 10)
     {
         logger.LogInformation($"{DateTime.Now}: GetCommentsForPerson(id: '{id}', level: {level})");
         var query = new GetCommentsForPersonQuery(
             id.ToGuid(),
             level,
             User.TryGetCurrentUserId(),
+            page,
+            pageSize,
             order.ToCommentSortByEnum());
         var result = await mediator.Send(query);
         return Ok(result);

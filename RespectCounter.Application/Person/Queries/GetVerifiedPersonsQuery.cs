@@ -2,13 +2,17 @@
 using RespectCounter.Domain.Contracts;
 using RespectCounter.Domain.Model;
 using RespectCounter.Application.DTOs;
-using System.Security.Claims;
 using RespectCounter.Application.Common;
 using RespectCounter.Application.Services;
 
 namespace RespectCounter.Application.Queries
 {
-    public record GetVerifiedPersonsQuery(string Search, PersonSortBy Order, Guid? UserId) : IRequest<IEnumerable<PersonDTO>>;
+    public record GetVerifiedPersonsQuery(
+        string Search,
+        PersonSortBy Order,
+        int Page,
+        int PageSize,
+        Guid? UserId) : IRequest<IEnumerable<PersonDTO>>;
 
     // to do: to find better solution for searching terms (contains is like "LIKE '%searchterm%'", so it is not an optimal solution)
     public class GetVerifiedPersonsQueryHandler : IRequestHandler<GetVerifiedPersonsQuery, IEnumerable<PersonDTO>>
@@ -46,6 +50,10 @@ namespace RespectCounter.Application.Queries
             }
 
             var orderedQuery = query.ApplySorting(request.Order);
+
+            orderedQuery = orderedQuery
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize);
 
             var persons = await uow.Repository()
                 .FindListAsync(

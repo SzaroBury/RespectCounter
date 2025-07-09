@@ -9,10 +9,12 @@ namespace RespectCounter.Application.Queries;
 
 public record GetActivitiesByPersonQuery(
     Guid PersonId,
-    Guid? UserId, 
-    ActivitySortBy? Order = null, 
-    ActivityType? Type = null, 
-    List<ActivityStatus>? Status = null
+    ActivityType? Type, 
+    List<ActivityStatus>? Status,
+    ActivitySortBy? Order, 
+    int Page,
+    int PageSize,
+    Guid? UserId
 ) : IRequest<IEnumerable<ActivityDTO>>;
 
 public class GetActivitiesByPersonQueryHandler : IRequestHandler<GetActivitiesByPersonQuery, IEnumerable<ActivityDTO>>
@@ -50,12 +52,7 @@ public class GetActivitiesByPersonQueryHandler : IRequestHandler<GetActivitiesBy
         var order = request.Order ?? ActivitySortBy.LatestAdded;
         var orderedQuery = query.ApplySorting(order);
 
-        Guid? userGuid = null;
-        if(request.UserId.HasValue)
-        {
-            User? user = await userService.GetByIdAsync(request.UserId.Value);
-            userGuid = user?.Id;
-        }
+        orderedQuery = orderedQuery.ApplyPaging(request.Page, request.PageSize);
 
         var activities = await uow.Repository()
             .FindListAsync(
@@ -68,6 +65,13 @@ public class GetActivitiesByPersonQueryHandler : IRequestHandler<GetActivitiesBy
         foreach (var act in activities)
         {
             act.CreatedBy = await userService.GetByIdAsync(act.CreatedById);
+        }
+
+        Guid? userGuid = null;
+        if(request.UserId.HasValue)
+        {
+            User? user = await userService.GetByIdAsync(request.UserId.Value);
+            userGuid = user?.Id;
         }
 
         return activities.Select(a => a.ToDTO(userGuid));
