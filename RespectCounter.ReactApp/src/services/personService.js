@@ -1,9 +1,11 @@
 import api from "../utils/refreshInterceptor/refreshInterceptor";
 
-export const getPersons = async ({ tags = [], order = "", onlyVerified = false } = {}) => {
+export const getPersons = async ({ tags = [], order = "", onlyVerified = false, page, pageSize } = {}) => {
     const params = {};
     if (tags && tags.length > 0) params.tags = tags.map(ts => ts.name).join(",");
     if (order) params.order = order;
+    if (page) params.page = page;
+    if (pageSize) params.pageSize = pageSize;
     const targetUrl = onlyVerified ? '' : '/all'
 
     return api.get(`/api/persons${targetUrl}`, { params });
@@ -26,6 +28,5 @@ export const hidePerson = (personId) => {
 };
 
 export const verifyPerson = (personId) => {
-    axios.defaults.withCredentials = true;
     api.put(`/api/person/${personId}/verify`);
 };

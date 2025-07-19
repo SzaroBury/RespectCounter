@@ -1,6 +1,7 @@
 import '../Comment.css';
 import { useState } from "react";
 import { useAuth } from '../../../utils/AuthProvider/AuthProvider';
+import { postComment } from '../../../services/commentService';
 
 function ReplyForm({commentId, onReplyAdded, onCancel}) {
     const [ inputValue, setInputValue ] = useState('');
@@ -11,30 +12,25 @@ function ReplyForm({commentId, onReplyAdded, onCancel}) {
     };
 
     const handleAddCommentClick = async () => {
-        if(!isLoggedIn) 
-        {
+        if(!isLoggedIn) {
             openLoginPopup();
             return;
         }
-        
-        try {
-            console.log('ReplyForm: sending a reply request.');
-            const response = await axios.post(`/api/comment/${commentId}`, inputValue, {
-                headers: { 
-                    "Content-Type": "application/json" 
-                }
+
+        postComment(`/api/comment/${commentId}`, inputValue)
+            .then((response) => {
+                console.log('ReplyForm: success ', response.data);
+                if(onReplyAdded) onReplyAdded();
+                setInputValue('');
+            })
+            .catch((error) => {
+                if(error.status === 401) {
+                    logout();
+                    onCancel();
+                } else {
+                    console.error('Error:', error);
+                };
             });
-            console.log('ReplyForm: success ', response.data);
-            if(onReplyAdded) onReplyAdded();
-            setInputValue('');
-        } catch (error) {
-            if(error.status === 401) {
-                logout();
-                onCancel();
-            } else {
-                console.error('Error:', error);
-            };
-        }
     };
 
     return(

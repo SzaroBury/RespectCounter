@@ -16,7 +16,7 @@ function HomePage() {
         console.log('HomePage: loadPersons()')
         setPersons([]);
 
-        const params = { params: { order: "MostRespected" } };
+        const params = { order: "MostRespected", pageSize: 5 };
 
         getPersons(params)
             .then(response => {

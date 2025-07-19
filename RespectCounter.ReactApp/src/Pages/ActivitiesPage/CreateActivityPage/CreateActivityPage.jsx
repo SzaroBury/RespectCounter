@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../utils/AuthProvider/AuthProvider";
 import { getPersonsNames } from "../../../services/personService";
 import { getPersonTags } from "../../../services/tagService";
+import { postActivity } from "../../../services/activityService";
 import PersonDropdown from "./PersonDropdown/PersonDropdown";
 import TagDropdown from "./TagDropdown/TagDropdown";
 
@@ -84,20 +85,21 @@ function CreateActivityPage() {
     };
 
     const handleCreateButton = async () => {
-        try {
-            console.log('CreateActivityPage: handleCreateButton()', formData);
-            const response = await axios.post('/api/activity', formData);
-            console.log('CreateActivityPage: success ', response.data);
-            navigate(`/act/${response.data.id}`);
-        } catch (error) {
-            if (error.response && error.response.status === 401) {
-                console.warn('Unauthorized! Redirecting to login...');
-                logout();
-                openLoginPopup();
-            } else {
-                console.error('An error occurred:', error);
-            }
-        }
+        console.log('CreateActivityPage: handleCreateButton()', formData);
+        postActivity(formData)
+            .then((response) => {
+                console.log('CreateActivityPage: success ', response.data);
+                navigate(`/act/${response.data.id}`);
+            })
+            .catch(error => {
+                if (error.response && error.response.status === 401) {
+                    console.warn('Unauthorized! Redirecting to login...');
+                    logout();
+                    openLoginPopup();
+                } else {
+                    console.error('An error occurred:', error);
+                }
+            });
     }
 
     useEffect(() => {

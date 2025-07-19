@@ -41,11 +41,12 @@ function ActivitiesPage(props) {
         console.log("ActivitiesPage: loadActivities()");
         setActivities([]);
     
-        const params = { params: { tags: tagsSelected, order: sortOption, onlyVerified: onlyVerifiedOption }}
+        console.log('onlyVerifiedOption', onlyVerifiedOption);
+        const params = { tags: tagsSelected, order: sortOption, onlyVerified: onlyVerifiedOption }
     
         getActivities(params)
             .then(response => {
-                setActivities(response);
+                setActivities(response.data);
                 console.log("Loaded activities: ", response);
                 setLoading(false);
             })

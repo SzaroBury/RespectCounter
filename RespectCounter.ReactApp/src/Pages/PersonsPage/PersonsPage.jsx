@@ -45,8 +45,7 @@ function PersonsPage({ props }) {
         console.log('PersonsPage: loadPersons(sortOption: "' + sortOption + '", onlyVerified: "' + onlyVerified + '")')
         setPersons([]);
 
-        const params = { params: { tags: tagsSelected, order: sortOption, onlyVerified } }
-
+        const params = { tags: tagsSelected, order: sortOption, onlyVerified };
 
         getPersons(params)
             .then(response => {

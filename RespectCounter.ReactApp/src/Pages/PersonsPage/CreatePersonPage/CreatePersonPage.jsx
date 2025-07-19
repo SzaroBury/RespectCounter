@@ -2,6 +2,7 @@ import './CreatePersonPage.css';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postPerson } from '../../../services/personService';
+import { getSimpleTags } from '../../../services/tagService';
 
 function CreatePersonPage() {
     const [formData, setFormData] = useState({ firstName: '', lastName: '', nickName: '', decs: '', nationality: '', birthDate: '', deathDate: '', tags: '' });
@@ -119,8 +120,8 @@ function TagDropdown() {
         console.log('TagDropdown: loadTags()');
         setAllTags([]);
 
-        axios.get('/api/tags/simple')
-            .then(response => {
+        getSimpleTags()
+            .then((response) => {
                 setAllTags(response.data);
             })
             .catch(error => {

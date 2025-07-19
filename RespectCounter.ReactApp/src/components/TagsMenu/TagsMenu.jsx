@@ -1,10 +1,11 @@
+import { getAllTags, getFavouriteTags, getRecentlyBrowsedTags } from '../../services/tagService';
 import './TagsMenu.css';
 import { useState, useEffect } from 'react';
 
-function TagsMenu({countMode = 'count', tagsSelected, setTagsSelected, currentTags}) {
+function TagsMenu({ countMode = 'count', tagsSelected, setTagsSelected, currentTags }) {
 
     const handleTagClick = (tag) => {
-        if(tagsSelected.some(ts => ts.id === tag.id)) {
+        if (tagsSelected.some(ts => ts.id === tag.id)) {
             setTagsSelected(tagsSelected.filter(ts => ts.id !== tag.id));
         } else {
             setTagsSelected([...tagsSelected, tag]);
@@ -14,18 +15,18 @@ function TagsMenu({countMode = 'count', tagsSelected, setTagsSelected, currentTa
     return (
         <div className="tags-menu">
             <section>
-                <h5 className='m-3'>Tags</h5> 
+                <h5 className='m-3'>Tags</h5>
             </section>
-            <CurrentTags currentTags={currentTags}/>
+            <CurrentTags currentTags={currentTags} />
             <RecentBrowsedTags tagsSelected={tagsSelected} />
             <FavouriteTags tagsSelected={tagsSelected} />
-            <TrendingTags tagsSelected={tagsSelected}/>
-            <AllTags count={countMode} tagsSelected={tagsSelected} onTagClick={handleTagClick}/>
+            <TrendingTags tagsSelected={tagsSelected} />
+            <AllTags count={countMode} tagsSelected={tagsSelected} onTagClick={handleTagClick} />
         </div>
     );
 }
 
-function CurrentTags({currentTags}) {
+function CurrentTags({ currentTags }) {
     return (
         currentTags && currentTags.length > 0 && (
             <section>
@@ -35,7 +36,7 @@ function CurrentTags({currentTags}) {
                         <li key={"CurrentTag_" + tag}>{tag}</li>
                     ))}
                 </ul>
-                <hr/>
+                <hr />
             </section>
         )
     );
@@ -52,29 +53,26 @@ function RecentBrowsedTags() {
 
     useEffect(() => {
         loadTags();
-    }, []); 
+    }, []);
 
     const loadTags = () => {
         console.log("TagsMenu.RecentBrowsedTags: loadTags()");
-        axios.get('/api/tags/recent')
+        getRecentlyBrowsedTags()
             .then(response => {
                 setTags(response.data);
             })
             .catch(error => {
-                if (error.response) 
-                {
+                if (error.response) {
                     console.error(`HTTP error! Status: ${error.response.status}`);
-                } 
-                else if (error.request) 
-                {
+                }
+                else if (error.request) {
                     console.error("No response received: ", error.request);
-                } 
-                else 
-                {
+                }
+                else {
                     console.error("Error setting up the request: ", error.message);
                 }
             }
-        );
+            );
     }
 
     if (tags.length === 0) {
@@ -102,25 +100,22 @@ function FavouriteTags() {
 
     const loadTags = () => {
         console.log("TagsMenu.FavouriteTags: loadTags()");
-        axios.get('/api/tags/favourite')
-        .then(response => {
-            setTags(response.data);
-        })
-        .catch(error => {
-            if (error.response) 
-            {
-                console.error(`HTTP error! Status: ${error.response.status}`);
-            } 
-            else if (error.request) 
-            {
-                console.error("No response received: ", error.request);
-            } 
-            else 
-            {
-                console.error("Error setting up the request: ", error.message);
-            }
-        }
-    );
+
+        getFavouriteTags()
+            .then(response => {
+                setTags(response.data);
+            })
+            .catch(error => {
+                if (error.response) {
+                    console.error(`HTTP error! Status: ${error.response.status}`);
+                }
+                else if (error.request) {
+                    console.error("No response received: ", error.request);
+                }
+                else {
+                    console.error("Error setting up the request: ", error.message);
+                }
+            });
     }
 
     if (tags.length === 0) {
@@ -139,7 +134,7 @@ function FavouriteTags() {
     );
 }
 
-function AllTags({count, tagsSelected, onTagClick}) {
+function AllTags({ count, tagsSelected, onTagClick }) {
     const [tags, setTags] = useState([]);
 
     useEffect(() => {
@@ -148,53 +143,49 @@ function AllTags({count, tagsSelected, onTagClick}) {
 
     const loadTags = () => {
         console.log("TagsMenu.AllTags: loadTags()");
-        axios.get('/api/tags')
+        getAllTags()
             .then(response => {
                 setTags(response.data);
             })
             .catch(error => {
-                if (error.response) 
-                {
+                if (error.response) {
                     console.error(`HTTP error! Status: ${error.response.status}`);
-                } 
-                else if (error.request) 
-                {
+                }
+                else if (error.request) {
                     console.error("No response received: ", error.request);
-                } 
-                else 
-                {
+                }
+                else {
                     console.error("Error setting up the request: ", error.message);
                 }
-            }
-        );
+            });
     }
 
     return (
-    <section>
-        {tags.length === 0 ? (
-            <ul className="placeholder-glow">
-                {Array.from({ length: 10 }, (_, index) => (
-                    <li key={`placeholder_${index}`} className="placeholder">
-                        Placeholder
-                    </li>
-                ))}
-            </ul>
-        ) : (
-            <ul>
-                {tags
-                    .filter(tag => tag[count] > 0)
-                    .map(tag => (
-                        <li
-                            key={`Tag_${tag.name}`}
-                            className={`tag-item ${tagsSelected.some(ts => ts.id === tag.id) ? "selected-tag" : ""}`}
-                            onClick={() => onTagClick(tag)}
-                        >
-                            {tag.name} ({tag[count]})
+        <section>
+            {tags.length === 0 ? (
+                <ul className="placeholder-glow">
+                    {Array.from({ length: 10 }, (_, index) => (
+                        <li key={`placeholder_${index}`} className="placeholder">
+                            Placeholder
                         </li>
                     ))}
-            </ul>
-        )}
-    </section>
+                </ul>
+            ) : (
+                <ul>
+                    {tags
+                        .filter(tag => tag[count] > 0)
+                        .map(tag => (
+                            <li
+                                key={`Tag_${tag.name}`}
+                                className={`tag-item ${tagsSelected.some(ts => ts.id === tag.id) ? "selected-tag" : ""}`}
+                                onClick={() => onTagClick(tag)}
+                            >
+                                {tag.name} ({tag[count]})
+                            </li>
+                        ))}
+                </ul>
+            )}
+        </section>
     );
 }
 
