@@ -1,15 +1,12 @@
 import api from "../utils/refreshInterceptor/refreshInterceptor";
 
-
-export const getActivities = async ({ tags = [], order = '', onlyVerified } = {}) => {
+export const getActivities = async ({ tags = [], order = '', onlyVerified, page, pageSize } = {}) => {
     const params = {};
     if (tags && tags.length > 0) params.tags = tags.map(ts => ts.name).join(",");
     if (order) params.order = order;
-    console.log('test');
-    console.log('onlyVerified', onlyVerified);
+    if (page) params.page = page;
+    if (pageSize) params.pageSize = pageSize;
     const targetUrl = onlyVerified ? '' : '/all'
-    console.log('targetUrl', targetUrl);
-    
     return api.get(`/api/activities${targetUrl}`, { params });
 };
 

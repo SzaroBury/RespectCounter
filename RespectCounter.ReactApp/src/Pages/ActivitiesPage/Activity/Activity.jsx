@@ -4,7 +4,7 @@ import ReactionButtons from "../../../components/ReactionButtons/ReactionButtons
 import { useState, useRef, useEffect } from "react";
 import { hideActivity, verifyActivity } from "../../../services/activityService";
 
-function Activity({a: activity, showCommentsButton=true}) {
+function Activity({a: activity, showCommentsButton=true, showReactionButtons=true, showDescription=true}) {
     const avatarUrl = activity.AvatarUrl ?? "default.jpg";
     const isAdmin = true;//user?.claims[2]?.value === "Admin";
     const [showMenu, setShowMenu] = useState(false);
@@ -49,40 +49,42 @@ function Activity({a: activity, showCommentsButton=true}) {
                 ) : (
                     <p className="text-center"><strong>"</strong><i>{activity.value}</i><strong>"</strong></p>
                 )}
-                <p>{activity.description}</p>
+                { showDescription && <p> { activity.description } </p> }
                 <span className='activity-source'>Source: {activity.source}</span>
             </div>
             
             <div className="activity-actions">
                 {showCommentsButton && <CommentsButton act={activity} />}
-                <div className="activity-reaction-buttons">
-                    <ReactionButtons 
-                        respect={activity.respect} 
-                        defaultReaction={activity.currentUsersReaction} 
-                        targetType="activity" 
-                        targetId={activity.id} />
-                    {isAdmin && (
-                        <div className="dropdown ms-2" style={{ position: "relative", display: "inline-block" }} ref={menuRef}>
-                            <button
-                                className="btn btn-outline-primary bi bi-three-dots-vertical"
-                                title="More"
-                                onClick={() => setShowMenu((prev) => !prev)}
-                                type="button"
-                            ></button>
-                            {showMenu && (
-                                <div className="dropdown-menu show text-center" style={{
-                                    display: "block",
-                                    position: "absolute",
-                                    right: 0,
-                                    zIndex: 1000
-                                }}>
-                                    <button className="dropdown-item" onClick={hideActivity}><span className="bi bi-eye-slash-fill me-3"></span>Hide</button>
-                                    <button className="dropdown-item" onClick={verifyActivity}><span className="bi bi-patch-check-fill me-3"></span>Verify</button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
+                {showReactionButtons &&
+                    <div className="activity-reaction-buttons">
+                        <ReactionButtons 
+                            respect={activity.respect} 
+                            defaultReaction={activity.currentUsersReaction} 
+                            targetType="activity" 
+                            targetId={activity.id} />
+                        {isAdmin && (
+                            <div className="dropdown ms-2" style={{ position: "relative", display: "inline-block" }} ref={menuRef}>
+                                <button
+                                    className="btn btn-outline-primary bi bi-three-dots-vertical"
+                                    title="More"
+                                    onClick={() => setShowMenu((prev) => !prev)}
+                                    type="button"
+                                ></button>
+                                {showMenu && (
+                                    <div className="dropdown-menu show text-center" style={{
+                                        display: "block",
+                                        position: "absolute",
+                                        right: 0,
+                                        zIndex: 1000
+                                    }}>
+                                        <button className="dropdown-item" onClick={hideActivity}><span className="bi bi-eye-slash-fill me-3"></span>Hide</button>
+                                        <button className="dropdown-item" onClick={verifyActivity}><span className="bi bi-patch-check-fill me-3"></span>Verify</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                }
 
             </div>
         </div>

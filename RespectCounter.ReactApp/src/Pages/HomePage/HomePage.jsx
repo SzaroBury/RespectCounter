@@ -1,9 +1,11 @@
 import "./HomePage.css";
 import { useState, useEffect } from 'react';
 import { getPersons } from "../../services/personService";
+import { getActivities } from "../../services/activityService";
 import { Link } from 'react-router-dom';
 import Loading from '../../components/Loading/Loading';
 import Person from '../PersonsPage/Person/Person';
+import Activity from "../ActivitiesPage/Activity/Activity";
 
 function HomePage() {
     const displayName = HomePage.name;
@@ -13,11 +15,11 @@ function HomePage() {
     const [activities, setActivities] = useState([]);
 
     const loadPersons = () => {
-        console.log('HomePage: loadPersons()')
+        console.log('HomePage: loadPersons()');
         setPersons([]);
-
+        setLoadingPersons(true);
+        
         const params = { order: "MostRespected", pageSize: 5 };
-
         getPersons(params)
             .then(response => {
                 setPersons(response.data);
@@ -36,9 +38,33 @@ function HomePage() {
             });
     }
 
+    const loadActivities = () => {
+        console.log('HomePage: loadActivities()');
+        setActivities([]);
+        setLoadingActivities(true);
+
+        const params = { order: 'Trending', onlyVerified: true, pageSize: 3 };
+        getActivities(params)
+            .then(response => {
+                setActivities(response.data);
+                setLoadingActivities(false);
+            })
+            .catch(error => {
+                setLoadingActivities(false);
+
+                if (error.response) {
+                    console.error(`HTTP error! Status: ${error.response.status}`);
+                } else if (error.request) {
+                    console.error("No response received: ", error.request);
+                } else {
+                    console.error("Error setting up the request: ", error.message);
+                }
+            });
+    };
+
     useEffect(() => {
-        setLoadingPersons(true);
         loadPersons();
+        loadActivities()
     }, []);
 
     return (
@@ -49,11 +75,16 @@ function HomePage() {
 
                 <div className="home-sections">
                     <div className="home-section">
-                        <h2>Trending Activities</h2>
+                        <h2 className="text-center">Trending Activities</h2>
                         <Loading loading={loadingActivities} />
-                        {/* {activities.map((act, index) => 
-                            <Person key={"Person_" + per.id} person={per} index={index}/>
-                        )} */}
+                        {activities.map((act, index) => 
+                            <Activity 
+                                key={"Act" + act.id} 
+                                a={act} 
+                                showCommentsButton={false}
+                                showReactionButtons={false}
+                                showDescription={false}/>
+                        )}
                         <div className="text-center">
                             <Link to="/activities">See more</Link>
                         </div>
