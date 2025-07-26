@@ -1,4 +1,4 @@
-import api from "../utils/refreshInterceptor/refreshInterceptor";
+import api from "../utils/interceptors/refreshInterceptor";
 
 export const getActivities = async ({ tags = [], order = '', onlyVerified, page, pageSize } = {}) => {
     const params = {};

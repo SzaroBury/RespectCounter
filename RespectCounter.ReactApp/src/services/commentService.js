@@ -1,4 +1,4 @@
-import api from "../utils/refreshInterceptor/refreshInterceptor";
+import api from "../utils/interceptors/refreshInterceptor";
 
 export const getCommentsByPersonId = async (personId, { order = "" } = {}) => {
     const params = {};
