@@ -1,7 +1,7 @@
 import './App.css'
 import { BrowserRouter as Router} from 'react-router-dom';
-import PageRenderer from './utils/PageRenderer/PageRenderer';
-import { AuthProvider } from './utils/AuthProvider/AuthProvider';
+import PageRenderer from './utils/pageRenderer/PageRenderer';
+import { AuthProvider } from './utils/providers/AuthProvider';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 
@@ -11,9 +11,9 @@ function App(props) {
         <div className='app'>
             <Router>
                 <AuthProvider>
-                    <Header />
-                    <PageRenderer/>
-                    <Footer/>
+                        <Header />
+                        <PageRenderer/>
+                        <Footer/>
                 </AuthProvider>
             </Router>
         </div>

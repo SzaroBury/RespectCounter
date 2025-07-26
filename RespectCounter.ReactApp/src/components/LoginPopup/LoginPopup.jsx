@@ -1,6 +1,6 @@
 import "./LoginPopup.css";
 import { useState } from "react";
-import { useAuth } from "../../utils/AuthProvider/AuthProvider";
+import { useAuth } from "../../utils/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
 
 function LoginPopup() {
