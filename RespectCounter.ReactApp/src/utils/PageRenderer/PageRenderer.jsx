@@ -1,5 +1,4 @@
 import "./PageRenderer.css";
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from '../../pages/HomePage/HomePage';
 import AboutPage from '../../pages/AboutPage/AboutPage';
