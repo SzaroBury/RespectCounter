@@ -1,25 +1,33 @@
 import './App.css'
 import { BrowserRouter as Router} from 'react-router-dom';
-import { AuthProvider } from './utils/providers/AuthProvider';
-import { NotificationProvider } from './utils/providers/NotificationProvider/NotificationProvider';
 import Header from './components/Header/Header';
 import PageRenderer from './utils/pageRenderer/PageRenderer';
 import Footer from './components/Footer/Footer';
+import { useNotification } from './utils/providers/NotificationProvider/NotificationProvider';
+import { setupRefreshInterceptor } from "./utils/interceptors/refreshInterceptor";
+import { setupErrorInterceptor } from "./utils/interceptors/errorInterceptor";
+import { callHandleLogout } from "./utils/providers/AuthProvider";
+import { useEffect } from 'react';
 
-function App(props) {
+let interceptorsSetupFlag = false;
+
+function App() {
+    const { notify } = useNotification();
+    
+    useEffect(() => {
+        if(!interceptorsSetupFlag) {
+            setupRefreshInterceptor(callHandleLogout);
+            setupErrorInterceptor(notify);
+            interceptorsSetupFlag = true;
+        }
+    }, []);
 
     return ( 
-        <div className='app'>
-            <Router>
-                <AuthProvider>
-                    <NotificationProvider>
-                        <Header />
-                        <PageRenderer/>
-                        <Footer/>
-                    </NotificationProvider>
-                </AuthProvider>
-            </Router>
-        </div>
+        <Router>
+            <Header/>
+            <PageRenderer/>
+            <Footer/>
+        </Router>
     );
 };
 

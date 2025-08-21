@@ -14,10 +14,10 @@ export const NotificationProvider = ({ children }) => {
         console.log(`createdAt: ${createdAt}`);
         setNotifications(prev => [...prev, { id, type, createdAt, message }]);
         
-        // Auto-remove after 5s
+        // Auto-remove after 8s
         setTimeout(() => {
             setNotifications(prev => prev.filter(n => n.id !== id));
-        }, 5000);
+        }, 8000);
     }, []);
 
     const removeNotification = useCallback((id) => {
